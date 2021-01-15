@@ -15,7 +15,7 @@ namespace SekiroNumbersMod {
         static FontFamily fontFamily;
         public static Rectangle rect;
 
-        int hp, post;
+        int hp, post, maxHp, maxPost;
         int lastHp = -1;
         int lastPost = -1;
 
@@ -25,8 +25,8 @@ namespace SekiroNumbersMod {
         static PointF postPos = new PointF(0.5f, 0.85f);
 
         public static List<FloatingNumber> numbers = new List<FloatingNumber>();
-        Stopwatch fullHpTimer = new Stopwatch();
-        Stopwatch fullPostTimer = new Stopwatch();
+        Stopwatch lastHitHp = new Stopwatch();
+        Stopwatch lastHitPost = new Stopwatch();
 
         public Drawer() {
             string workingDir = Environment.CurrentDirectory;
@@ -36,6 +36,8 @@ namespace SekiroNumbersMod {
             fontFamily = new FontFamily("Athelas", collection);
             font = new Font(fontFamily, 20, FontStyle.Bold);
 
+            lastHitHp.Start();
+            lastHitPost.Start();
         }
 
         public void draw(Graphics g) {
@@ -47,15 +49,17 @@ namespace SekiroNumbersMod {
         void updateData() {
             hp = DataReader.getHealth();
             post = DataReader.getPosture();
+            maxHp = DataReader.getMaxHealth();
+            maxPost = DataReader.getMaxPosture();
 
             if (hp != lastHp && lastHp != -1) {
                 if (hp > lastHp) {
                     numbers.Add(new FloatingNumber(hpPos, Brushes.LightGreen, hp - lastHp));
                 }
                 else if (hp < lastHp) {
-                    //lastHitHp.Restart();
-                    //health.Hidden = false;
                     numbers.Add(new FloatingNumber(hpPos, Brushes.Red, lastHp - hp));
+                    lastHitHp.Restart();
+                    health.hidden = false;
                 }
             }
             if (post != lastPost && lastPost != -1) {
@@ -63,10 +67,16 @@ namespace SekiroNumbersMod {
                     numbers.Add(new FloatingNumber(postPos, Brushes.Aquamarine, post - lastPost));
                 }
                 else if (post < lastPost) {
-                    //posture.Hidden = false;
                     numbers.Add(new FloatingNumber(postPos, Brushes.Orange, lastPost - post));
+                    lastHitPost.Restart();
+                    posture.hidden = false;
                 }
             }
+
+            if (hp == maxHp && !health.hidden && lastHitHp.ElapsedMilliseconds >= 5000)
+                health.hidden = true;
+            if (post == maxPost && !posture.hidden && lastHitPost.ElapsedMilliseconds >= 5000)
+                posture.hidden = true;
 
             health.value = hp;
             posture.value = post;

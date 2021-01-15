@@ -10,6 +10,7 @@ namespace SekiroNumbersMod.Scripts {
         protected PointF startPos;
         protected Brush brush;
         public int value;
+        public bool hidden = false;
         public Number(PointF pos, Brush brush, int value) {
             startPos = pos;
             this.value = value;
@@ -17,7 +18,8 @@ namespace SekiroNumbersMod.Scripts {
         }
 
         public virtual void draw(Graphics g) {
-            g.DrawString(value.ToString(), Drawer.font, brush, getPos());
+            if (!hidden)
+                g.DrawString(value.ToString(), Drawer.font, brush, getPos());
         }
 
         protected virtual PointF getPos() {
