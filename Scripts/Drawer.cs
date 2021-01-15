@@ -25,6 +25,13 @@ namespace SekiroNumbersMod {
         static PointF hpPos = new PointF(0.3f, 0.85f);
         static PointF postPos = new PointF(0.5f, 0.85f);
 
+        Brush postB = Brushes.Gold;
+        Brush hpB = Brushes.Crimson;
+        Brush hpHealB = Brushes.LightGreen;
+        Brush hpDamB = Brushes.Red;
+        Brush postHealB = Brushes.Aquamarine;
+        Brush postDamB = Brushes.Orange;
+
         List<Entity> entities = new List<Entity>();
         List<Entity> lastEntities = new List<Entity>();
 
@@ -47,6 +54,7 @@ namespace SekiroNumbersMod {
         public void updateData() {
             updatePlayerData();
             updateEnemyData();
+            Console.WriteLine(DataReader.baseHpDamage());
         }
 
         public void draw(Graphics g) {
@@ -62,20 +70,20 @@ namespace SekiroNumbersMod {
 
             if (hp != lastHp && lastHp != -1) {
                 if (hp > lastHp) {
-                    numbers.Add(new FloatingNumber(hpPos, Brushes.LightGreen, hp - lastHp));
+                    numbers.Add(new FloatingNumber(hpPos, hpHealB, hp - lastHp));
                 }
                 else if (hp < lastHp) {
-                    numbers.Add(new FloatingNumber(hpPos, Brushes.Red, lastHp - hp));
+                    numbers.Add(new FloatingNumber(hpPos, hpDamB, lastHp - hp));
                     lastHitHp.Restart();
                     health.hidden = false;
                 }
             }
             if (post != lastPost && lastPost != -1) {
                 if (post > lastPost && post - lastPost > 30) {
-                    numbers.Add(new FloatingNumber(postPos, Brushes.Aquamarine, post - lastPost));
+                    numbers.Add(new FloatingNumber(postPos, postHealB, post - lastPost));
                 }
                 else if (post < lastPost) {
-                    numbers.Add(new FloatingNumber(postPos, Brushes.Orange, lastPost - post));
+                    numbers.Add(new FloatingNumber(postPos, postDamB, lastPost - post));
                     lastHitPost.Restart();
                     posture.hidden = false;
                 }
@@ -95,11 +103,21 @@ namespace SekiroNumbersMod {
 
         void updateEnemyData() {
             entities = DataReader.entityList();
-
             if (entities.Count == lastEntities.Count) { //enemies are same, check hp changes
                 for (int i = 0; i < entities.Count; i++) {
-                    if (entities[i].hp < lastEntities[i].hp) {
-                        numbers.Add(new FloatingNumber(new PointF(0.5f, 0.5f), Brushes.Red, lastEntities[i].hp - entities[i].hp));
+                    int dHp = entities[i].hp - lastEntities[i].hp;
+                    int dPost = entities[i].post - lastEntities[i].post;
+                    if (dHp < 0) {
+                        numbers.Add(new FloatingNumber(new PointF(0.48f, 0.5f), hpDamB, -dHp));
+                    }
+                    else if (dHp > 0) {
+                        numbers.Add(new FloatingNumber(new PointF(0.48f, 0.5f), hpHealB, dHp));
+                    }
+                    if (dPost < 0) {
+                        numbers.Add(new FloatingNumber(new PointF(0.52f, 0.5f), postDamB, -dPost));
+                    }
+                    else if (dPost > 30) {
+                        numbers.Add(new FloatingNumber(new PointF(0.52f, 0.5f), postHealB, dPost));
                     }
                 }
             }

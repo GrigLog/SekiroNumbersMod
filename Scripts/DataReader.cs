@@ -25,21 +25,34 @@ namespace SekiroNumbersMod {
         static Int32 playerOffset = 0x3D5AAC0;
         static IntPtr mapAddress = new IntPtr(0x143D7A1E0);
         static Dictionary<string, int[]> map = new Dictionary<string, int[]>() {
-            {"player", new int[] {0x3D5AAC0}},
             {"money",  new int[] {0x8, 0x7c}},
             {"health", new int[] {0x8, 0x18}},
-            {"maxHealth", new int[] {0x8, 0x1c}},
+            {"max health", new int[] {0x8, 0x1c}},
             {"posture", new int[] {0x8, 0x34}},
-            {"maxPosture", new int[]{0x8, 0x38}},
+            {"max posture", new int[]{0x8, 0x38}},
+            {"attack power", new int[]{0x8, 0x48}},
             {"areas", new int[] {0x518}},
             {"entity hp", new int[] {0x1ff8, 0x18, 0x130}},
             {"entity post", new int[] {0x1ff8, 0x18, 0x148}}
         };
 
+        public static int baseHpDamage() {
+            int ap = getInt("attack power", modulePtr + playerOffset);
+            if (ap <= 14)
+                return (ap + 3) * 20;
+            else if (ap <= 27)
+                return 340 + 8 * (ap - 14);
+            else if (ap <= 51)
+                return 443 + 4 * (ap - 27);
+            else
+                return (int)(578 + 0.8 * (ap - 51));
+        }
+
         static DataReader(){
             process = Process.GetProcessesByName("Sekiro")[0];
             processPtr = OpenProcess(0x001F0FFF, false, process.Id);
             modulePtr = getModuleAddress(process, "sekiro.exe");
+            Console.WriteLine("Module pointer: " + modulePtr);
         }
 
         public static int getMoney() {
@@ -49,13 +62,13 @@ namespace SekiroNumbersMod {
             return getInt("health", modulePtr + playerOffset);
         }
         public static int getMaxHealth() {
-            return getInt("maxHealth", modulePtr + playerOffset);
+            return getInt("max health", modulePtr + playerOffset);
         }
         public static int getPosture() {
             return getInt("posture", modulePtr + playerOffset);
         }
         public static int getMaxPosture() {
-            return getInt("maxPosture", modulePtr + playerOffset);
+            return getInt("max posture", modulePtr + playerOffset);
         }
 
         public static List<Entity> entityList() {
@@ -63,7 +76,6 @@ namespace SekiroNumbersMod {
             IntPtr mapPtr = read(mapAddress);
             mapPtr += 0x518;
             for (int i = 0; i <= 18; i++) {
-                //Console.WriteLine(i + " " + read(mapPtr + i * 8));
                 IntPtr areaPtr = read(mapPtr + i * 8);
                 if (areaPtr != IntPtr.Zero) {
                     IntPtr entityAddr = read(areaPtr + 0x8);  //first entity in a list
@@ -76,13 +88,10 @@ namespace SekiroNumbersMod {
                             break;
                         }
                         if (read(entityAddr) != IntPtr.Zero) {
-                            //Console.WriteLine(entityAddr);
-                            //Console.Write(getInt("entity hp", entityAddr) + " ");
                             res.Add(new Entity(getInt("entity hp", entityAddr), getInt("entity post", entityAddr)));
                         }
                         entityAddr += 0x38;
                     }
-                    //Console.WriteLine(".");
                 }
             }
             return res;

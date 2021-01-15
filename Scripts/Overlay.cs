@@ -34,7 +34,6 @@ namespace SekiroNumbersMod {
 
         private void Overlay_Paint(object sender, PaintEventArgs e) {
             GetWindowRect(Program.window, out temp);
-            //Console.WriteLine(temp);
             temp = new Rectangle(temp.X, temp.Y, temp.Width - temp.X, temp.Height - temp.Y);
             Bounds = temp;
             Drawer.rect = temp;
