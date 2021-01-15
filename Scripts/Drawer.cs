@@ -15,6 +15,7 @@ namespace SekiroNumbersMod {
         static FontFamily fontFamily;
         public static Rectangle rect;
 
+
         int hp, post, maxHp, maxPost;
         int lastHp = -1;
         int lastPost = -1;
@@ -23,6 +24,9 @@ namespace SekiroNumbersMod {
         Number posture = new Number(new PointF(0.5f, 0.92f), Brushes.Gold, 0);
         static PointF hpPos = new PointF(0.3f, 0.85f);
         static PointF postPos = new PointF(0.5f, 0.85f);
+
+        List<Entity> entities = new List<Entity>();
+        List<Entity> lastEntities = new List<Entity>();
 
         public static List<FloatingNumber> numbers = new List<FloatingNumber>();
         Stopwatch lastHitHp = new Stopwatch();
@@ -41,12 +45,13 @@ namespace SekiroNumbersMod {
         }
 
         public void draw(Graphics g) {
-            updateData();
+            updatePlayerData();
+            updateEnemyData();
             drawStatic(g);
             drawFloating(g);
         }
 
-        void updateData() {
+        void updatePlayerData() {
             hp = DataReader.getHealth();
             post = DataReader.getPosture();
             maxHp = DataReader.getMaxHealth();
@@ -83,6 +88,22 @@ namespace SekiroNumbersMod {
 
             lastHp = hp;
             lastPost = post;
+        }
+
+        void updateEnemyData() {
+            entities = DataReader.entityList();
+
+            if (entities.Count == lastEntities.Count) { //enemies are same, check hp changes
+                for (int i = 0; i < entities.Count; i++) {
+                    if (entities[i].hp < lastEntities[i].hp) {
+                        numbers.Add(new FloatingNumber(new PointF(0.5f, 0.5f), Brushes.Red, lastEntities[i].hp - entities[i].hp));
+                    }
+                }
+            }
+
+            lastEntities.Clear();
+            foreach (var e in entities)
+                lastEntities.Add(e);
         }
 
         void drawStatic(Graphics g) {

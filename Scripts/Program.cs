@@ -21,6 +21,7 @@ namespace SekiroNumbersMod {
             window = process.MainWindowHandle;
 
             Console.WriteLine("Starting an overlay.");
+
             Application.Run(new Overlay());
         }
     }
