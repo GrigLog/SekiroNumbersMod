@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace SekiroNumbersMod.Scripts {
     class Number {
-        PointF startPos;
-        Brush brush;
+        protected PointF startPos;
+        protected Brush brush;
         public int value;
         public Number(PointF pos, Brush brush, int value) {
             startPos = pos;
@@ -16,11 +16,11 @@ namespace SekiroNumbersMod.Scripts {
             this.brush = brush;
         }
 
-        public void draw(Graphics g) {
+        public virtual void draw(Graphics g) {
             g.DrawString(value.ToString(), Drawer.font, brush, getPos());
         }
 
-        PointF getPos() {
+        protected virtual PointF getPos() {
             return new PointF(Drawer.rect.Width * startPos.X - value.ToString().Length / 2 * Drawer.font.Size, Drawer.rect.Height * startPos.Y);
         }
     }

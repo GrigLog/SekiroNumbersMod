@@ -67,6 +67,7 @@
   <ItemGroup>
     <Compile Include="Scripts\DataReader.cs" />
     <Compile Include="Scripts\Drawer.cs" />
+    <Compile Include="Scripts\FloatingNumber.cs" />
     <Compile Include="Scripts\Number.cs" />
     <Compile Include="Scripts\Overlay.cs">
       <SubType>Form</SubType>
