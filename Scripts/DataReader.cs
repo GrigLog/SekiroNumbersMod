@@ -58,14 +58,6 @@ namespace SekiroNumbersMod {
             return getInt("maxPosture", modulePtr + playerOffset);
         }
 
-        /*public static void healFull() {
-            int h = getMaxHealth();
-            byte[] mx = BitConverter.GetBytes(h);
-           
-            Console.WriteLine(writeData(modulePtr + playerOffset, map["health"], mx));
-            Console.WriteLine(Kernel32Methods.GetLastError());
-        }*/
-
         public static List<Entity> entityList() {
             var res = new List<Entity>();
             IntPtr mapPtr = read(mapAddress);

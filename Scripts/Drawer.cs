@@ -44,9 +44,12 @@ namespace SekiroNumbersMod {
             lastHitPost.Start();
         }
 
-        public void draw(Graphics g) {
+        public void updateData() {
             updatePlayerData();
             updateEnemyData();
+        }
+
+        public void draw(Graphics g) {
             drawStatic(g);
             drawFloating(g);
         }
