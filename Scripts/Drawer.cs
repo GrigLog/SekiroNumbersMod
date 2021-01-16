@@ -40,6 +40,9 @@ namespace SekiroNumbersMod {
         Stopwatch lastHitHp = new Stopwatch();
         Stopwatch lastHitPost = new Stopwatch();
 
+        Stopwatch diagn = new Stopwatch();
+        int count, time;
+
         public Drawer() {
             string workingDir = Environment.CurrentDirectory;
             string projDir = Directory.GetParent(workingDir).Parent.Parent.FullName;
@@ -55,9 +58,10 @@ namespace SekiroNumbersMod {
 
         public void updateData() {
             updatePlayerData();
+            diagn.Restart();
             updateEnemyData();
-            cors = DataReader.coords();
-            //Console.WriteLine(cors);
+            time += (int)diagn.ElapsedMilliseconds;
+            Console.WriteLine("entity data " + time / (float)++count);
         }
 
         public void draw(Graphics g) {
@@ -66,6 +70,7 @@ namespace SekiroNumbersMod {
         }
 
         void updatePlayerData() {
+            cors = DataReader.coords();
             hp = DataReader.getHealth();
             post = DataReader.getPosture();
             maxHp = DataReader.getMaxHealth();
@@ -117,7 +122,6 @@ namespace SekiroNumbersMod {
                     int dPost = entities[i].post - lastEntities[i].post;
                     if (dHp < 0) {
                         numbers.Add(new FloatingNumber(new PointF(0.48f, 0.5f), hpDamB, Config.formatHpDam(-dHp)));
-                        Console.WriteLine(entities[i].cors + " " + V3.distance(entities[i].cors, cors));
                     }
                     else if (dHp > 0) {
                         numbers.Add(new FloatingNumber(new PointF(0.48f, 0.5f), hpHealB, Config.formatHpDam(dHp)));

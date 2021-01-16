@@ -41,10 +41,15 @@ namespace SekiroNumbersMod {
         static IntPtr processPtr;
         static IntPtr modulePtr;
 
+        //declared here to optimize calculations
+        static byte[] buffer = new byte[8];
+        static IntPtr mapPtr, areaPtr, entityAddr, hpPtr, corsPtr;
+
         static Int32 playerOffset = 0x3D5AAC0;
         static IntPtr mapAddress = new IntPtr(0x143D7A1E0);
         static int oneMoreOffset = 0x3D94970;
         static Dictionary<string, int[]> map = new Dictionary<string, int[]>() {
+            {"", new int[]{} },
             {"money",  new int[] {0x8, 0x7c}},
             {"health", new int[] {0x8, 0x18}},
             {"max health", new int[] {0x8, 0x1c}},
@@ -63,7 +68,7 @@ namespace SekiroNumbersMod {
         };
 
         public static int baseHpDamage() {
-            int ap = getInt("attack power", modulePtr + playerOffset);
+            int ap = getInt(modulePtr + playerOffset, "attack power");
             if (ap <= 14)
                 return (ap + 3) * 20;
             else if (ap <= 27)
@@ -75,7 +80,7 @@ namespace SekiroNumbersMod {
         }
 
         public static int basePostDamage() {
-            int ap = getInt("attack power", modulePtr + playerOffset);
+            int ap = getInt(modulePtr + playerOffset, "attack power");
             if (ap <= 14)
                 return (int)(30 + (ap - 1) * 7.5);
             else if (ap <= 27)
@@ -94,35 +99,35 @@ namespace SekiroNumbersMod {
         }
 
         public static V3 coords() {
-            return new V3(getFloat("player x", modulePtr + oneMoreOffset),
-                getFloat("player y", modulePtr + oneMoreOffset),
-                getFloat("player z", modulePtr + oneMoreOffset));
+            return new V3(getFloat(modulePtr + oneMoreOffset, "player x"),
+                getFloat(modulePtr + oneMoreOffset, "player y"),
+                getFloat(modulePtr + oneMoreOffset, "player z"));
         }
 
         public static int getMoney() {
-            return getInt("money", modulePtr + playerOffset);
+            return getInt(modulePtr + playerOffset, "money");
         }
         public static int getHealth() {
-            return getInt("health", modulePtr + playerOffset);
+            return getInt(modulePtr + playerOffset, "health");
         }
         public static int getMaxHealth() {
-            return getInt("max health", modulePtr + playerOffset);
+            return getInt(modulePtr + playerOffset, "max health");
         }
         public static int getPosture() {
-            return getInt("posture", modulePtr + playerOffset);
+            return getInt(modulePtr + playerOffset, "posture");
         }
         public static int getMaxPosture() {
-            return getInt("max posture", modulePtr + playerOffset);
+            return getInt(modulePtr + playerOffset, "max posture");
         }
 
         public static List<Entity> entityList(bool printCoords = false) {
             var res = new List<Entity>();
-            IntPtr mapPtr = read(mapAddress);
+            mapPtr = read(mapAddress);
             mapPtr += 0x518;
             for (int i = 0; i <= 18; i++) {
-                IntPtr areaPtr = read(mapPtr + i * 8);
+                areaPtr = read(mapPtr + i * 8);
                 if (areaPtr != IntPtr.Zero) {
-                    IntPtr entityAddr = read(areaPtr + 0x8);  //first entity in a list
+                    entityAddr = read(areaPtr + 0x8);  //first entity in a list
                     while (true) {
                         if (read(entityAddr) == IntPtr.Zero 
                             && read(entityAddr + 8) != IntPtr.Zero 
@@ -132,11 +137,11 @@ namespace SekiroNumbersMod {
                             break;
                         }
                         if (read(entityAddr) != IntPtr.Zero) {
-                            Entity e = new Entity(getInt("entity hp", entityAddr),
-                                               getInt("entity post", entityAddr),
-                                               new V3(getFloat("entity x", entityAddr),
-                                                      getFloat("entity y", entityAddr),
-                                                      getFloat("entity z", entityAddr)));
+                            hpPtr = findDataAddr(entityAddr, map["entity hp"]);
+                            corsPtr = findDataAddr(entityAddr, map["entity x"]);
+                            Entity e = new Entity(getInt(hpPtr),
+                                                  getInt(hpPtr + 0x18),
+                                                  new V3(getFloat(corsPtr), getFloat(corsPtr + 0x10), getFloat(corsPtr + 0x20)));
                             res.Add(e);
                             if (printCoords)
                                 Console.WriteLine(e.cors);
@@ -148,25 +153,29 @@ namespace SekiroNumbersMod {
             return res;
         }
 
-        public static int getInt(string key, IntPtr ptr) {
+        public static int getInt(IntPtr ptr, string key = "") {
             return BitConverter.ToInt32(findData(ptr, map[key]), 0);
         }
 
-        public static float getFloat(string key, IntPtr ptr) {
+        public static float getFloat(IntPtr ptr, string key = "") {
             return BitConverter.ToSingle(findData(ptr, map[key]), 0);
         }
 
-        static byte[] findData(IntPtr pointer, int[] offsets) {
+        public static IntPtr findDataAddr(IntPtr pointer, int[] offsets) {
             foreach (int i in offsets) {
                 pointer = read(pointer) + i;
             }
-            byte[] buffer = new byte[8];
-            ReadProcessMemory(processPtr, pointer, buffer, buffer.Length, 0);
+            return pointer;
+        }
+
+        static byte[] findData(IntPtr pointer, int[] offsets) {
+
+            ReadProcessMemory(processPtr, findDataAddr(pointer, offsets), buffer, buffer.Length, 0);
             return buffer;
         }
 
         static IntPtr read(IntPtr ptr) {
-            byte[] buffer = new byte[8];
+            
             ReadProcessMemory(processPtr, ptr, buffer, buffer.Length, 0);
             return new IntPtr(BitConverter.ToInt64(buffer, 0));
         }
