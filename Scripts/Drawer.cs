@@ -61,7 +61,11 @@ namespace SekiroNumbersMod {
             diagn.Restart();
             updateEnemyData();
             time += (int)diagn.ElapsedMilliseconds;
-            Console.WriteLine("entity data " + time / (float)++count);
+            //Console.WriteLine("entity data " + time / (float)count);
+            if (count++ == 3000) {
+                count = 0;
+                time = 0;
+            }
         }
 
         public void draw(Graphics g) {
@@ -129,7 +133,7 @@ namespace SekiroNumbersMod {
                     if (dPost < 0) {
                         numbers.Add(new FloatingNumber(new PointF(0.52f, 0.5f), postDamB, Config.formatPostDam(-dPost)));
                     }
-                    else if (dPost > 30) {
+                    else if (dPost > entities[i].maxPost / 20) {
                         numbers.Add(new FloatingNumber(new PointF(0.52f, 0.5f), postHealB, Config.formatPostDam(dPost)));
                     }
                 }

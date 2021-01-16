@@ -22,7 +22,7 @@ namespace SekiroNumbersMod {
 
             Console.WriteLine("Starting an overlay.");
 
-            DataReader.entityList(true);
+            //DataReader.entityList(true);
 
             Application.Run(new Overlay());
         }

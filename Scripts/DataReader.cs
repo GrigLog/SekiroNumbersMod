@@ -11,12 +11,14 @@ using System.Threading.Tasks;
 
 namespace SekiroNumbersMod {
     struct Entity {
-        public Entity(int hp, int post, V3 cors) {
+        public Entity(int hp, int maxHp, int post, int maxPost, V3 cors) {
             this.hp = hp;
+            this.maxHp = maxHp;
             this.post = post;
+            this.maxPost = maxPost;
             this.cors = cors;
         }
-        public int hp, post;
+        public int hp, post, maxHp, maxPost;
         public V3 cors;
     }
     public struct V3 {
@@ -139,8 +141,7 @@ namespace SekiroNumbersMod {
                         if (read(entityAddr) != IntPtr.Zero) {
                             hpPtr = findDataAddr(entityAddr, map["entity hp"]);
                             corsPtr = findDataAddr(entityAddr, map["entity x"]);
-                            Entity e = new Entity(getInt(hpPtr),
-                                                  getInt(hpPtr + 0x18),
+                            Entity e = new Entity(getInt(hpPtr), getInt(hpPtr + 0x4), getInt(hpPtr + 0x18), getInt(hpPtr + 0x1c),
                                                   new V3(getFloat(corsPtr), getFloat(corsPtr + 0x10), getFloat(corsPtr + 0x20)));
                             res.Add(e);
                             if (printCoords)

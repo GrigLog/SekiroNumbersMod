@@ -24,13 +24,19 @@ namespace SekiroNumbersMod.Scripts {
         public static string formatHpDam(int v) {
             if (absoluteDamageVals)
                 return v.ToString();
-            return Math.Round((float)v / DataReader.baseHpDamage(), 2) + "x";
+            double res = Math.Round((float)v / DataReader.baseHpDamage(), 2);
+            if (res >= 0.98 && res <= 1.02)  //sometimes damage calculation is not 100% accurate
+                res = 1;
+            return res + "x";
         }
 
         public static string formatPostDam(int v) {
             if (absoluteDamageVals)
                 return v.ToString();
-            return Math.Round((float)v / DataReader.basePostDamage(), 2) + "x";
+            double res = Math.Round((float)v / DataReader.basePostDamage(), 2);
+            if (res >= 0.98 && res <= 1.02)  //sometimes damage calculation is not 100% accurate
+                res = 1;
+            return res + "x";
         }
     }
 }
