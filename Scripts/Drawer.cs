@@ -19,6 +19,7 @@ namespace SekiroNumbersMod {
         int hp, post, maxHp, maxPost;
         int lastHp = -1;
         int lastPost = -1;
+        V3 cors;
 
         Number health = new Number(new PointF(0.25f, 0.92f), Brushes.Crimson, "");
         Number posture = new Number(new PointF(0.5f, 0.92f), Brushes.Gold, "");
@@ -55,6 +56,8 @@ namespace SekiroNumbersMod {
         public void updateData() {
             updatePlayerData();
             updateEnemyData();
+            cors = DataReader.coords();
+            //Console.WriteLine(cors);
         }
 
         public void draw(Graphics g) {
@@ -107,10 +110,14 @@ namespace SekiroNumbersMod {
             entities = DataReader.entityList();
             if (entities.Count == lastEntities.Count) { //enemies are same, check hp changes
                 for (int i = 0; i < entities.Count; i++) {
+                    if (entities[i].cors.isZero() || V3.distance(entities[i].cors, cors) > 35)
+                        continue;
+
                     int dHp = entities[i].hp - lastEntities[i].hp;
                     int dPost = entities[i].post - lastEntities[i].post;
                     if (dHp < 0) {
                         numbers.Add(new FloatingNumber(new PointF(0.48f, 0.5f), hpDamB, Config.formatHpDam(-dHp)));
+                        Console.WriteLine(entities[i].cors + " " + V3.distance(entities[i].cors, cors));
                     }
                     else if (dHp > 0) {
                         numbers.Add(new FloatingNumber(new PointF(0.48f, 0.5f), hpHealB, Config.formatHpDam(dHp)));
