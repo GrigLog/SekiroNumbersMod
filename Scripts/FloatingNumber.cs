@@ -9,8 +9,9 @@ namespace SekiroNumbersMod.Scripts {
     class FloatingNumber : Number {
         int counter;
         int lifetime;
-        public FloatingNumber(PointF pos, Brush brush, int value, int lifetime=30) : base(pos, brush, value) {
+        public FloatingNumber(PointF pos, Brush brush, string value, int lifetime=30) : base(pos, brush, value) {
             this.lifetime = lifetime;
+            small = true;
         }
 
         public override void draw(Graphics g) {
@@ -21,7 +22,7 @@ namespace SekiroNumbersMod.Scripts {
         }
 
         protected override PointF getPos() {
-            return new PointF(Drawer.rect.Width * startPos.X - value.ToString().Length / 2 * Drawer.font.Size, Drawer.rect.Height * startPos.Y - counter);
+            return new PointF(Drawer.rect.Width * startPos.X - value.Length / 2 * Drawer.smallFont.Size, Drawer.rect.Height * startPos.Y - counter);
         }
     }
 }

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace SekiroNumbersMod {
     class Drawer {
-        public static Font font;
+        public static Font font, smallFont;
         static FontFamily fontFamily;
         public static Rectangle rect;
 
@@ -20,8 +20,8 @@ namespace SekiroNumbersMod {
         int lastHp = -1;
         int lastPost = -1;
 
-        Number health = new Number(new PointF(0.25f, 0.92f), Brushes.Crimson, 0);
-        Number posture = new Number(new PointF(0.5f, 0.92f), Brushes.Gold, 0);
+        Number health = new Number(new PointF(0.25f, 0.92f), Brushes.Crimson, "");
+        Number posture = new Number(new PointF(0.5f, 0.92f), Brushes.Gold, "");
         static PointF hpPos = new PointF(0.3f, 0.85f);
         static PointF postPos = new PointF(0.5f, 0.85f);
 
@@ -46,6 +46,7 @@ namespace SekiroNumbersMod {
             collection.AddFontFile(projDir + "\\Resources\\Athelas-Regular.ttf");
             fontFamily = new FontFamily("Athelas", collection);
             font = new Font(fontFamily, 20, FontStyle.Bold);
+            smallFont = new Font(fontFamily, 18);
 
             lastHitHp.Start();
             lastHitPost.Start();
@@ -67,22 +68,24 @@ namespace SekiroNumbersMod {
             maxHp = DataReader.getMaxHealth();
             maxPost = DataReader.getMaxPosture();
 
-            if (hp != lastHp && lastHp != -1) {
-                if (hp > lastHp) {
-                    numbers.Add(new FloatingNumber(hpPos, hpHealB, hp - lastHp));
+            int dHp = hp - lastHp;
+            int dPost = post - lastPost;
+            if (dHp != 0 && lastHp != -1) {
+                if (dHp > 0) {
+                    numbers.Add(new FloatingNumber(hpPos, hpHealB, Config.formatSelfHp(dHp)));
                 }
-                else if (hp < lastHp) {
-                    numbers.Add(new FloatingNumber(hpPos, hpDamB, lastHp - hp));
+                else if (dHp < 0) {
+                    numbers.Add(new FloatingNumber(hpPos, hpDamB, Config.formatSelfHp(-dHp)));
                     lastHitHp.Restart();
                     health.hidden = false;
                 }
             }
-            if (post != lastPost && lastPost != -1) {
-                if (post > lastPost && post - lastPost > 30) {
-                    numbers.Add(new FloatingNumber(postPos, postHealB, post - lastPost));
+            if (dPost != 0 && lastPost != -1) {
+                if (dPost > 30) {
+                    numbers.Add(new FloatingNumber(postPos, postHealB, Config.formatSelfPost(dPost)));
                 }
-                else if (post < lastPost) {
-                    numbers.Add(new FloatingNumber(postPos, postDamB, lastPost - post));
+                else if (dPost < 0) {
+                    numbers.Add(new FloatingNumber(postPos, postDamB, Config.formatSelfPost(-dPost)));
                     lastHitPost.Restart();
                     posture.hidden = false;
                 }
@@ -93,8 +96,8 @@ namespace SekiroNumbersMod {
             if (post == maxPost && !posture.hidden && lastHitPost.ElapsedMilliseconds >= 5000)
                 posture.hidden = true;
 
-            health.value = hp;
-            posture.value = post;
+            health.value = Config.formatSelfHp(hp);
+            posture.value = Config.formatSelfPost(post);
 
             lastHp = hp;
             lastPost = post;
@@ -107,16 +110,16 @@ namespace SekiroNumbersMod {
                     int dHp = entities[i].hp - lastEntities[i].hp;
                     int dPost = entities[i].post - lastEntities[i].post;
                     if (dHp < 0) {
-                        numbers.Add(new FloatingNumber(new PointF(0.48f, 0.5f), hpDamB, -dHp));
+                        numbers.Add(new FloatingNumber(new PointF(0.48f, 0.5f), hpDamB, Config.formatHpDam(-dHp)));
                     }
                     else if (dHp > 0) {
-                        numbers.Add(new FloatingNumber(new PointF(0.48f, 0.5f), hpHealB, dHp));
+                        numbers.Add(new FloatingNumber(new PointF(0.48f, 0.5f), hpHealB, Config.formatHpDam(dHp)));
                     }
                     if (dPost < 0) {
-                        numbers.Add(new FloatingNumber(new PointF(0.52f, 0.5f), postDamB, -dPost));
+                        numbers.Add(new FloatingNumber(new PointF(0.52f, 0.5f), postDamB, Config.formatPostDam(-dPost)));
                     }
                     else if (dPost > 30) {
-                        numbers.Add(new FloatingNumber(new PointF(0.52f, 0.5f), postHealB, dPost));
+                        numbers.Add(new FloatingNumber(new PointF(0.52f, 0.5f), postHealB, Config.formatPostDam(dPost)));
                     }
                 }
             }

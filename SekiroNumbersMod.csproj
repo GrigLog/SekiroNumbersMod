@@ -65,6 +65,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Scripts\Config.cs" />
     <Compile Include="Scripts\DataReader.cs" />
     <Compile Include="Scripts\Drawer.cs" />
     <Compile Include="Scripts\FloatingNumber.cs" />

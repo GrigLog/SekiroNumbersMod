@@ -9,21 +9,27 @@ namespace SekiroNumbersMod.Scripts {
     class Number {
         protected PointF startPos;
         protected Brush brush;
-        public int value;
+        public string value;
         public bool hidden = false;
-        public Number(PointF pos, Brush brush, int value) {
+        public bool small = false;
+
+        public Number(PointF pos, Brush brush, string value) {
             startPos = pos;
             this.value = value;
             this.brush = brush;
         }
 
         public virtual void draw(Graphics g) {
-            if (!hidden)
-                g.DrawString(value.ToString(), Drawer.font, brush, getPos());
+            if (!hidden) {
+                if (!small)
+                    g.DrawString(value, Drawer.font, brush, getPos());
+                else
+                    g.DrawString(value, Drawer.smallFont, brush, getPos());
+            }
         }
 
         protected virtual PointF getPos() {
-            return new PointF(Drawer.rect.Width * startPos.X - value.ToString().Length / 2 * Drawer.font.Size, Drawer.rect.Height * startPos.Y);
+            return new PointF(Drawer.rect.Width * startPos.X - value.Length / 2 * Drawer.font.Size, Drawer.rect.Height * startPos.Y);
         }
     }
 }
