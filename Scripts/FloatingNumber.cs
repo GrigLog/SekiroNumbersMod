@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace SekiroNumbersMod.Scripts {
     class FloatingNumber : Number {
-        int counter;
-        int lifetime;
-        public FloatingNumber(PointF pos, Brush brush, string value, int lifetime=30) : base(pos, brush, value) {
+        public int counter;
+        public int lifetime;
+        public FloatingNumber(PointF pos, Brush brush, string text, int value=0, int lifetime=30) : base(pos, brush, text, value) {
             this.lifetime = lifetime;
             small = true;
         }
@@ -22,7 +22,7 @@ namespace SekiroNumbersMod.Scripts {
         }
 
         protected override PointF getPos() {
-            return new PointF(Drawer.rect.Width * startPos.X - value.Length / 2 * Drawer.smallFont.Size, Drawer.rect.Height * startPos.Y - counter);
+            return new PointF(Drawer.rect.Width * startPos.X - text.Length / 2 * Drawer.smallFont.Size, Drawer.rect.Height * startPos.Y - counter);
         }
     }
 }

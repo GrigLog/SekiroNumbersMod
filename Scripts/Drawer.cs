@@ -108,8 +108,8 @@ namespace SekiroNumbersMod {
             if (post == maxPost && !posture.hidden && lastHitPost.ElapsedMilliseconds >= 5000)
                 posture.hidden = true;
 
-            health.value = Config.formatSelfHp(hp);
-            posture.value = Config.formatSelfPost(post);
+            health.text = Config.formatSelfHp(hp);
+            posture.text = Config.formatSelfPost(post);
 
             lastHp = hp;
             lastPost = post;
@@ -125,16 +125,16 @@ namespace SekiroNumbersMod {
                     int dHp = entities[i].hp - lastEntities[i].hp;
                     int dPost = entities[i].post - lastEntities[i].post;
                     if (dHp < 0) {
-                        numbers.Add(new FloatingNumber(new PointF(0.48f, 0.5f), hpDamB, Config.formatHpDam(-dHp)));
+                        addNumber(new PointF(0.48f, 0.5f), hpDamB, -dHp);
                     }
                     else if (dHp > 0) {
-                        numbers.Add(new FloatingNumber(new PointF(0.48f, 0.5f), hpHealB, Config.formatHpDam(dHp)));
+                        addNumber(new PointF(0.48f, 0.5f), hpHealB, dHp);
                     }
                     if (dPost < 0) {
-                        numbers.Add(new FloatingNumber(new PointF(0.52f, 0.5f), postDamB, Config.formatPostDam(-dPost)));
+                        addNumber(new PointF(0.52f, 0.5f), postDamB, -dPost);
                     }
-                    else if (dPost > entities[i].maxPost / 20) {
-                        numbers.Add(new FloatingNumber(new PointF(0.52f, 0.5f), postHealB, Config.formatPostDam(dPost)));
+                    else if (dPost > entities[i].maxPost / 8) {
+                        addNumber(new PointF(0.52f, 0.5f), postHealB, dPost);
                     }
                 }
             }
@@ -142,6 +142,24 @@ namespace SekiroNumbersMod {
             lastEntities.Clear();
             foreach (var e in entities)
                 lastEntities.Add(e);
+        }
+
+        void addNumber(PointF pos, Brush brush, int value) {
+            FloatingNumber n;
+            if (brush == hpHealB || brush == hpDamB) {
+                n = new FloatingNumber(pos, brush, Config.formatHpDam(value), value);
+            } else {
+                n = new FloatingNumber(pos, brush, Config.formatPostDam(value), value);
+            }
+            foreach (var e in numbers.ToArray()) {
+                if (e.brush == n.brush && e.counter <= 20 && Number.distance(e, n) <= 50) {  //merge two close numbers
+                    numbers.Remove(e);
+                    addNumber(pos, brush, value + e.value);
+                    return;
+                }
+                    
+            }
+            numbers.Add(n);
         }
 
         void drawStatic(Graphics g) {
