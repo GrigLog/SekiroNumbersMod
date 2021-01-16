@@ -54,7 +54,7 @@ namespace SekiroNumbersMod {
         public void updateData() {
             updatePlayerData();
             updateEnemyData();
-            Console.WriteLine(DataReader.baseHpDamage());
+            Console.WriteLine(DataReader.basePostDamage());
         }
 
         public void draw(Graphics g) {

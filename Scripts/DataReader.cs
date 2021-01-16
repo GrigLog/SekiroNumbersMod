@@ -41,11 +41,23 @@ namespace SekiroNumbersMod {
             if (ap <= 14)
                 return (ap + 3) * 20;
             else if (ap <= 27)
-                return 340 + 8 * (ap - 14);
+                return 340 + (ap - 14) * 8;
             else if (ap <= 51)
-                return 443 + 4 * (ap - 27);
+                return 443 + (ap - 27) * 4;
             else
-                return (int)(578 + 0.8 * (ap - 51));
+                return (int)(578 + (ap - 51) * 0.8);
+        }
+
+        public static int basePostDamage() {
+            int ap = getInt("attack power", modulePtr + playerOffset);
+            if (ap <= 14)
+                return (int)(30 + (ap - 1) * 7.5);
+            else if (ap <= 27)
+                return 127 + (ap - 14) * 3;
+            else if (ap <= 51)
+                return (int)(166 + (ap - 27) * 1.5);
+            else
+                return (int)(202 + (ap - 51) * 0.25);
         }
 
         static DataReader(){
