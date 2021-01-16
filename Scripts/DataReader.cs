@@ -45,7 +45,7 @@ namespace SekiroNumbersMod {
             else if (ap <= 51)
                 return 443 + (ap - 27) * 4;
             else
-                return (int)(578 + (ap - 51) * 0.8);
+                return (int)(540 + (ap - 51) * 0.8);
         }
 
         public static int basePostDamage() {
