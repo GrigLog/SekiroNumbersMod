@@ -8,25 +8,21 @@ using System.Threading.Tasks;
 namespace SekiroNumbersMod.Scripts {
     class Number {
         public PointF startPos;
-        public Brush brush;
+        public Color color;
         public string text;
         public int value;
         public bool hidden = false;
-        public bool small = false;
 
-        public Number(PointF pos, Brush brush, string text, int value=0) {
+        public Number(PointF pos, Color color, string text, int value=0) {
             startPos = pos;
             this.text = text;
-            this.brush = brush;
+            this.color = color;
             this.value = value;
         }
 
         public virtual void draw(Graphics g) {
             if (!hidden) {
-                if (!small)
-                    g.DrawString(text, Drawer.font, brush, getPos());
-                else
-                    g.DrawString(text, Drawer.smallFont, brush, getPos());
+                g.DrawString(text, Drawer.font, new SolidBrush(color), getPos());
             }
         }
 

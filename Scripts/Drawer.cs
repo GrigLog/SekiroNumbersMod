@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace SekiroNumbersMod {
     class Drawer {
-        public static Font font, smallFont;
+        public static Font font, smallFont, bigFont;
         static FontFamily fontFamily;
         public static Rectangle rect;
 
@@ -21,17 +21,17 @@ namespace SekiroNumbersMod {
         int lastPost = -1;
         V3 cors;
 
-        Number health = new Number(new PointF(0.25f, 0.92f), Brushes.Crimson, "");
-        Number posture = new Number(new PointF(0.5f, 0.92f), Brushes.Gold, "");
+        Number health = new Number(new PointF(0.25f, 0.92f), Color.Crimson, "");
+        Number posture = new Number(new PointF(0.5f, 0.92f), Color.Gold, "");
         static PointF hpPos = new PointF(0.3f, 0.85f);
         static PointF postPos = new PointF(0.5f, 0.85f);
 
-        Brush postB = Brushes.Gold;
-        Brush hpB = Brushes.Crimson;
-        Brush hpHealB = Brushes.LightGreen;
-        Brush hpDamB = Brushes.Red;
-        Brush postHealB = Brushes.Aquamarine;
-        Brush postDamB = Brushes.Orange;
+        Color postB = Color.Gold;
+        Color hpB = Color.Crimson;
+        Color hpHealB = Color.LightGreen;
+        Color hpDamB = Color.Red;
+        Color postHealB = Color.Aquamarine;
+        Color postDamB = Color.Orange;
 
         List<Entity> entities = new List<Entity>();
         List<Entity> lastEntities = new List<Entity>();
@@ -51,6 +51,7 @@ namespace SekiroNumbersMod {
             fontFamily = new FontFamily("Athelas", collection);
             font = new Font(fontFamily, 20, FontStyle.Bold);
             smallFont = new Font(fontFamily, 18);
+            bigFont = new Font(fontFamily, 23);
 
             lastHitHp.Start();
             lastHitPost.Start();
@@ -93,7 +94,7 @@ namespace SekiroNumbersMod {
                 }
             }
             if (dPost != 0 && lastPost != -1) {
-                if (dPost > 30) {
+                if (dPost > 30 && dPost != maxPost) {
                     numbers.Add(new FloatingNumber(postPos, postHealB, Config.formatSelfPost(dPost)));
                 }
                 else if (dPost < 0) {
@@ -119,22 +120,25 @@ namespace SekiroNumbersMod {
             entities = DataReader.entityList();
             if (entities.Count == lastEntities.Count) { //enemies are same, check hp changes
                 for (int i = 0; i < entities.Count; i++) {
-                    if (entities[i].cors.isZero() || V3.distance(entities[i].cors, cors) > 35)
+                    if (entities[i].cors.isZero() || (entities[i].maxHp == maxHp && entities[i].maxPost == maxPost) || V3.distance(entities[i].cors, cors) > 35)
                         continue;
 
                     int dHp = entities[i].hp - lastEntities[i].hp;
                     int dPost = entities[i].post - lastEntities[i].post;
+                    if (Math.Abs(dPost) > 1000000 || Math.Abs(dHp) > 1000000)
+                        continue;
                     if (dHp < 0) {
-                        addNumber(new PointF(0.48f, 0.5f), hpDamB, -dHp);
+                        addNumber(new PointF(0.48f, 0.40f), hpDamB, -dHp);  //dont spawn right in the center of screen, it causes micro stagger!
                     }
-                    else if (dHp > 0) {
-                        addNumber(new PointF(0.48f, 0.5f), hpHealB, dHp);
+                    else if (dHp > 0 && dHp != entities[i].maxHp) {
+                        addNumber(new PointF(0.48f, 0.40f), hpHealB, dHp);
                     }
                     if (dPost < 0) {
-                        addNumber(new PointF(0.52f, 0.5f), postDamB, -dPost);
+                        addNumber(new PointF(0.52f, 0.40f), postDamB, -dPost);
                     }
-                    else if (dPost > entities[i].maxPost / 8) {
-                        addNumber(new PointF(0.52f, 0.5f), postHealB, dPost);
+                    else if (dPost > 30 && dPost > entities[i].maxPost / 8 && dPost != entities[i].maxPost) {
+                        Console.WriteLine(dPost + " "  + entities[i].maxPost);
+                        addNumber(new PointF(0.52f, 0.40f), postHealB, dPost);
                     }
                 }
             }
@@ -144,17 +148,19 @@ namespace SekiroNumbersMod {
                 lastEntities.Add(e);
         }
 
-        void addNumber(PointF pos, Brush brush, int value) {
+        void addNumber(PointF pos, Color color, int value, bool combo = false) {
             FloatingNumber n;
-            if (brush == hpHealB || brush == hpDamB) {
-                n = new FloatingNumber(pos, brush, Config.formatHpDam(value), value);
+            if (color == hpHealB || color == hpDamB) {
+                n = new FloatingNumber(pos, color, Config.formatHpDam(value), value);
             } else {
-                n = new FloatingNumber(pos, brush, Config.formatPostDam(value), value);
+                n = new FloatingNumber(pos, color, Config.formatPostDam(value), value);
             }
+            if (combo)
+                n.big = 5;
             foreach (var e in numbers.ToArray()) {
-                if (e.brush == n.brush && e.counter <= 20 && Number.distance(e, n) <= 50) {  //merge two close numbers
+                if (e.color == n.color && e.counter <= 20 && Number.distance(e, n) <= 50) {  //merge two close numbers
                     numbers.Remove(e);
-                    addNumber(pos, brush, value + e.value);
+                    addNumber(pos, color, value + e.value, true);
                     return;
                 }
                     
