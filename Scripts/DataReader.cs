@@ -154,8 +154,21 @@ namespace SekiroNumbersMod {
                         if (read(entityAddr) != IntPtr.Zero) {
                             hpPtr = findDataAddr(entityAddr, map["entity hp"]);
                             corsPtr = findDataAddr(entityAddr, map["entity x"]);
-                            Entity e = new Entity(getInt(hpPtr), getInt(hpPtr + 0x4), getInt(hpPtr + 0x18), getInt(hpPtr + 0x1c),
-                                                  new V3(getFloat(corsPtr), getFloat(corsPtr + 0x10), getFloat(corsPtr + 0x20)));
+                            byte[] hpData = new byte[0x20];
+                            ReadProcessMemory(processPtr, hpPtr, hpData, hpData.Length, 0);
+                            int hp = BitConverter.ToInt32(hpData, 0);
+                            int mHp = BitConverter.ToInt32(hpData, 4);
+                            int post = BitConverter.ToInt32(hpData, 0x18);
+                            int mPost = BitConverter.ToInt32(hpData, 0x1c);
+
+                            byte[] corsData = new byte[0x30];
+                            ReadProcessMemory(processPtr, corsPtr, corsData, corsData.Length, 0);
+                            float x = BitConverter.ToSingle(corsData, 0);
+                            float y = BitConverter.ToSingle(corsData, 0x10);
+                            float z = BitConverter.ToSingle(corsData, 0x20);
+                            Entity e = new Entity(hp, mHp, post, mPost,
+                                                  new V3(x, y, z));
+                            //Console.WriteLine(e)
                             res.Add(e);
                             if (printCoords)
                                 Console.WriteLine(e.cors);
@@ -163,6 +176,14 @@ namespace SekiroNumbersMod {
                         entityAddr += 0x38;
                     }
                 }
+            }
+            return res;
+        }
+
+        static byte[] slice(byte[] arr, int start, int len=4) {  //had to implement this because .Take() and .Skip() are way too slow :I
+            byte[] res = new byte[len];
+            for (int i = 0; i < len; i++) {
+                res[i] = arr[start + i];
             }
             return res;
         }

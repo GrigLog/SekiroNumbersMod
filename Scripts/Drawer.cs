@@ -41,7 +41,7 @@ namespace SekiroNumbersMod {
         Stopwatch lastHitPost = new Stopwatch();
 
         Stopwatch diagn = new Stopwatch();
-        int count, time;
+        int time, count;
 
         public Drawer() {
             string workingDir = Environment.CurrentDirectory;
@@ -62,8 +62,8 @@ namespace SekiroNumbersMod {
             diagn.Restart();
             updateEnemyData();
             time += (int)diagn.ElapsedMilliseconds;
-            //Console.WriteLine("entity data " + time / (float)count);
-            if (count++ == 3000) {
+            Console.WriteLine("entity data " + time / (float)count);
+            if (++count % 3000 == 0) {
                 count = 0;
                 time = 0;
             }
