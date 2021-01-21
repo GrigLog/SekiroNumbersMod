@@ -10,47 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace SekiroNumbersMod {
-    struct Entity {
-        public Entity(int hp, int maxHp, int post, int maxPost, V3 cors) {
-            this.hp = hp;
-            this.maxHp = maxHp;
-            this.post = post;
-            this.maxPost = maxPost;
-            this.cors = cors;
-        }
-        public int hp, post, maxHp, maxPost;
-        public V3 cors;
-    }
-    public struct V3 {
-        public float x, y, z;
-        public V3(float x, float y, float z) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-        public bool isZero() {
-            return x == 0 && y == 0 && z == 0;
-        }
-        public static double distance(V3 a, V3 b) {
-            return Math.Sqrt(Math.Pow(a.x - b.x, 2) + Math.Pow(a.y - b.y, 2) + Math.Pow(a.z - b.z, 2));
-        }
-
-        public override bool Equals(object obj) {
-            if (!(obj is V3))
-                return false;
-            V3 v = (V3)obj;
-            return x == v.x && y == v.y && z == v.z;
-        }
-        public static bool operator==(V3 a, V3 b) {
-            return a.x == b.x && a.y == b.y && a.z == b.z;
-        }
-        public static bool operator !=(V3 a, V3 b) {
-            return !(a == b);
-        }
-        public override string ToString() {
-            return "{" + x + ", " + y + ", " + z + "}";
-        }
-    }
     class DataReader {
         static Process process;
         static IntPtr processPtr;
@@ -58,7 +17,7 @@ namespace SekiroNumbersMod {
 
         //declared here to optimize calculations
         static byte[] buffer = new byte[8];
-        static IntPtr mapPtr, areaPtr, entityAddr, hpPtr, corsPtr;
+        static IntPtr mapPtr, areaPtr, entityDecorPtr, hpPtr, corsPtr;
 
         static Int32 playerOffset = 0x3D5AAC0;
         static IntPtr mapAddress = new IntPtr(0x143D7A1E0);
@@ -119,22 +78,6 @@ namespace SekiroNumbersMod {
                 getFloat(modulePtr + oneMoreOffset, "player z"));
         }
 
-        public static int getMoney() {
-            return getInt(modulePtr + playerOffset, "money");
-        }
-        public static int getHealth() {
-            return getInt(modulePtr + playerOffset, "health");
-        }
-        public static int getMaxHealth() {
-            return getInt(modulePtr + playerOffset, "max health");
-        }
-        public static int getPosture() {
-            return getInt(modulePtr + playerOffset, "posture");
-        }
-        public static int getMaxPosture() {
-            return getInt(modulePtr + playerOffset, "max posture");
-        }
-
         public static List<Entity> entityList(bool printCoords = false) {
             var res = new List<Entity>();
             mapPtr = read(mapAddress);
@@ -142,18 +85,19 @@ namespace SekiroNumbersMod {
             for (int i = 0; i <= 18; i++) {
                 areaPtr = read(mapPtr + i * 8);
                 if (areaPtr != IntPtr.Zero) {
-                    entityAddr = read(areaPtr + 0x8);  //first entity in a list
+                    entityDecorPtr = read(areaPtr + 0x8);  //first entity in a list
                     while (true) {
-                        if (read(entityAddr) == IntPtr.Zero 
-                            && read(entityAddr + 8) != IntPtr.Zero 
-                            && read(entityAddr + 16) != IntPtr.Zero
-                            && read(entityAddr + 24) != IntPtr.Zero 
-                            && read(entityAddr + 32) != IntPtr.Zero) { //attempt to understand that entity list is over
+                        IntPtr entityStart = read(entityDecorPtr);
+                        if (entityStart == IntPtr.Zero 
+                            && read(entityDecorPtr + 8) != IntPtr.Zero 
+                            && read(entityDecorPtr + 16) != IntPtr.Zero
+                            && read(entityDecorPtr + 24) != IntPtr.Zero 
+                            && read(entityDecorPtr + 32) != IntPtr.Zero) { //attempt to understand that entity list is over
                             break;
                         }
-                        if (read(entityAddr) != IntPtr.Zero) {
-                            hpPtr = findDataAddr(entityAddr, map["entity hp"]);
-                            corsPtr = findDataAddr(entityAddr, map["entity x"]);
+                        if (entityStart != IntPtr.Zero) {
+                            hpPtr = findDataAddr(entityDecorPtr, map["entity hp"]);
+                            corsPtr = findDataAddr(entityDecorPtr, map["entity x"]);
                             byte[] hpData = new byte[0x20];
                             ReadProcessMemory(processPtr, hpPtr, hpData, hpData.Length, 0);
                             int hp = BitConverter.ToInt32(hpData, 0);
@@ -166,24 +110,14 @@ namespace SekiroNumbersMod {
                             float x = BitConverter.ToSingle(corsData, 0);
                             float y = BitConverter.ToSingle(corsData, 0x10);
                             float z = BitConverter.ToSingle(corsData, 0x20);
-                            Entity e = new Entity(hp, mHp, post, mPost,
-                                                  new V3(x, y, z));
-                            //Console.WriteLine(e)
+                            Entity e = new Entity(hp, mHp, post, mPost, new V3(x, y, z));
                             res.Add(e);
                             if (printCoords)
                                 Console.WriteLine(e.cors);
                         }
-                        entityAddr += 0x38;
+                        entityDecorPtr += 0x38;
                     }
                 }
-            }
-            return res;
-        }
-
-        static byte[] slice(byte[] arr, int start, int len=4) {  //had to implement this because .Take() and .Skip() are way too slow :I
-            byte[] res = new byte[len];
-            for (int i = 0; i < len; i++) {
-                res[i] = arr[start + i];
             }
             return res;
         }
@@ -221,6 +155,22 @@ namespace SekiroNumbersMod {
                     return m.BaseAddress;
             }
             return new IntPtr();
+        }
+
+        public static int getMoney() {
+            return getInt(modulePtr + playerOffset, "money");
+        }
+        public static int getHealth() {
+            return getInt(modulePtr + playerOffset, "health");
+        }
+        public static int getMaxHealth() {
+            return getInt(modulePtr + playerOffset, "max health");
+        }
+        public static int getPosture() {
+            return getInt(modulePtr + playerOffset, "posture");
+        }
+        public static int getMaxPosture() {
+            return getInt(modulePtr + playerOffset, "max posture");
         }
 
 
