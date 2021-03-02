@@ -68,6 +68,7 @@
     <Compile Include="Scripts\Config.cs" />
     <Compile Include="Scripts\Data\DataReader.cs" />
     <Compile Include="Scripts\Data\Entity.cs" />
+    <Compile Include="Scripts\Data\Matrix.cs" />
     <Compile Include="Scripts\Data\V3.cs" />
     <Compile Include="Scripts\Drawer.cs" />
     <Compile Include="Scripts\FloatingNumber.cs" />

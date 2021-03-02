@@ -19,7 +19,8 @@ namespace SekiroNumbersMod {
         static byte[] buffer = new byte[8];
         static IntPtr mapPtr, areaPtr, entityDecorPtr, hpPtr, corsPtr;
 
-        static Int32 playerOffset = 0x3D5AAC0;
+        static int playerOffset = 0x3D5AAC0;
+        static IntPtr cameraSmthAddress = new IntPtr(0x143D91848);
         static IntPtr mapAddress = new IntPtr(0x143D7A1E0);
         static int oneMoreOffset = 0x3D94970;
         static Dictionary<string, int[]> map = new Dictionary<string, int[]>() {
@@ -39,31 +40,10 @@ namespace SekiroNumbersMod {
             {"player x", new int[]{0x10, 0x5e8, 0xd8, 0x40}},
             {"player y", new int[]{0x10, 0x5e8, 0xd8, 0x44}},
             {"player z", new int[]{0x10, 0x5e8, 0xd8, 0x48}},
+            {"camera x", new int[]{0x18, 0x30 }},
+            {"camera y", new int[]{0x18, 0x34 }},
+            {"camera z", new int[]{0x18, 0x38 }}
         };
-
-        public static int baseHpDamage() {
-            int ap = getInt(modulePtr + playerOffset, "attack power");
-            if (ap <= 14)
-                return (ap + 3) * 20;
-            else if (ap <= 27)
-                return 340 + (ap - 14) * 8;
-            else if (ap <= 51)
-                return 443 + (ap - 27) * 4;
-            else
-                return (int)(540 + (ap - 51) * 0.8);
-        }
-
-        public static int basePostDamage() {
-            int ap = getInt(modulePtr + playerOffset, "attack power");
-            if (ap <= 14)
-                return (int)(30 + (ap - 1) * 7.5);
-            else if (ap <= 27)
-                return 127 + (ap - 14) * 3;
-            else if (ap <= 51)
-                return (int)(166 + (ap - 27) * 1.5);
-            else
-                return (int)(202 + (ap - 51) * 0.25);
-        }
 
         static DataReader(){
             process = Process.GetProcessesByName("Sekiro")[0];
@@ -77,6 +57,13 @@ namespace SekiroNumbersMod {
                 getFloat(modulePtr + oneMoreOffset, "player y"),
                 getFloat(modulePtr + oneMoreOffset, "player z"));
         }
+
+        public static V3 cameraCoords() {
+            return new V3(getFloat(cameraSmthAddress, "camera x"),
+                getFloat(cameraSmthAddress, "camera y"),
+                getFloat(cameraSmthAddress, "camera z"));
+        }
+
 
         public static List<Entity> entityList(bool printCoords = false) {
             var res = new List<Entity>();
@@ -113,10 +100,12 @@ namespace SekiroNumbersMod {
                             Entity e = new Entity(hp, mHp, post, mPost, new V3(x, y, z));
                             res.Add(e);
                             if (printCoords)
-                                Console.WriteLine(e.cors);
+                                Console.Write(e.cors);
                         }
                         entityDecorPtr += 0x38;
                     }
+                    if (printCoords)
+                        Console.WriteLine();
                 }
             }
             return res;
@@ -149,13 +138,7 @@ namespace SekiroNumbersMod {
             return new IntPtr(BitConverter.ToInt64(buffer, 0));
         }
 
-        static IntPtr getModuleAddress(Process proc, string modName) {
-            foreach (ProcessModule m in proc.Modules) {
-                if (m.ModuleName == modName)
-                    return m.BaseAddress;
-            }
-            return new IntPtr();
-        }
+      
 
         public static int getMoney() {
             return getInt(modulePtr + playerOffset, "money");
@@ -171,6 +154,38 @@ namespace SekiroNumbersMod {
         }
         public static int getMaxPosture() {
             return getInt(modulePtr + playerOffset, "max posture");
+        }
+
+        static IntPtr getModuleAddress(Process proc, string modName) {
+            foreach (ProcessModule m in proc.Modules) {
+                if (m.ModuleName == modName)
+                    return m.BaseAddress;
+            }
+            return new IntPtr();
+        }
+
+        public static int baseHpDamage() {
+            int ap = getInt(modulePtr + playerOffset, "attack power");
+            if (ap <= 14)
+                return (ap + 3) * 20;
+            else if (ap <= 27)
+                return 340 + (ap - 14) * 8;
+            else if (ap <= 51)
+                return 443 + (ap - 27) * 4;
+            else
+                return (int)(540 + (ap - 51) * 0.8);
+        }
+
+        public static int basePostDamage() {
+            int ap = getInt(modulePtr + playerOffset, "attack power");
+            if (ap <= 14)
+                return (int)(30 + (ap - 1) * 7.5);
+            else if (ap <= 27)
+                return 127 + (ap - 14) * 3;
+            else if (ap <= 51)
+                return (int)(166 + (ap - 27) * 1.5);
+            else
+                return (int)(202 + (ap - 51) * 0.25);
         }
 
 
