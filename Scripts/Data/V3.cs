@@ -21,6 +21,10 @@ namespace SekiroNumbersMod {
             z /= len;
             return this;
         }
+        public V3 normalized() {
+            float len = length();
+            return new V3(x / len, y / len, z / len);
+        }
         public float length() {
             return (float)Math.Sqrt(x * x + y * y + z * z);
         }
@@ -58,8 +62,11 @@ namespace SekiroNumbersMod {
         public static double operator*(V3 a, V3 b) {
             return a.x * b.x + a.y * b.y + a.z * b.z;
         }
+        public static V3 operator*(V3 v, double k) {
+            return new V3(v.x * k, v.y * k, v.z * k);
+        }
         public override string ToString() {
-            return "{" + x + ", " + y + ", " + z + "}";
+            return "{" + Math.Round(x, 3) + ", " + Math.Round(y, 3) + ", " + Math.Round(z, 3) + "}";
         }
     }
 }

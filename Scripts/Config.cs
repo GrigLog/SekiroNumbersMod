@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SekiroNumbersMod.Scripts {
     class Config {
-        public static bool absoluteDamageVals = true;
+        public static bool absoluteDamageVals = false;
         public static bool absoluteSelfVals = false;
 
         public static string formatSelfHp(int v) {

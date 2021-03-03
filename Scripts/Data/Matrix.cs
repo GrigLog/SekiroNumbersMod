@@ -56,7 +56,7 @@ namespace SekiroNumbersMod.Scripts.Data {
             double near = 1;
             double far = 1000;
             double fovx = 1.347; //in radians?...
-            double fovy = 0.5;
+            double fovy = 1;
             return new V3(v.x / Tan(fovx / 2) / v.z, v.y / Tan(fovy / 2) / v.z, ((far + near) + 2*near*far/-v.z) / (near - far));
         }
         /*public static Matrix getProjMatrix() {

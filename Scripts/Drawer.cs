@@ -66,45 +66,49 @@ namespace SekiroNumbersMod {
 
         public void draw(Graphics g) {
             V3 camCors = DataReader.cameraCoords();
-            if (true || diagn.ElapsedMilliseconds > 1000) {
+            if (diagn.ElapsedMilliseconds > 1000) {
                 diagn.Restart();
-                if (entities.Count > 2) {
-                    V3 mobCors = entities[2].cors;
-                    Point pos = toScreenCors2(mobCors);
-                    g.DrawString("0", font, Brushes.White, pos);
-                }
             }
+            /*foreach(Entity e in entities) {
+                string exit;
+                Point pos = toScreenCors2(e.cors, out exit);
+                g.DrawString(exit , font, Brushes.White, pos);
+            }*/
             drawStatic(g);
             drawFloating(g);
             
             
         }
 
-        public Point toScreenCors2(V3 cors) {
+        public Point toScreenCors2(V3 cors, out string extr) {
             V3 camRelative1 = DataReader.cameraCoords();
-            V3 camRelative = Matrix.rotateY(camRelative1, -55.8 / 57.2956);
+            camRelative1.y = camRelative1.y * 1.95f;
+            V3 camRelative = Matrix.rotateY(camRelative1, -55.15 / 57.2956) * 2;
             V3 playerCors = DataReader.coords();
 
-            V3 cam = playerCors + camRelative;
-            V3 corsTransCam = cors - cam;
-            V3 zaxis = -camRelative.normalize();
+            V3 camGlobal = playerCors + camRelative;
+            V3 corsForCamera = cors - camGlobal;
+            V3 zaxis = -camRelative.normalized();
             V3 xaxis = V3.cross(new V3(0f, 1f, 0f), zaxis).normalize();
-            V3 yaxis = V3.cross(xaxis, zaxis).normalize();
+            V3 yaxis = V3.cross(zaxis, xaxis).normalize();
 
-            V3 viewCors = new V3(corsTransCam * xaxis, corsTransCam * yaxis, corsTransCam * zaxis);
+            V3 viewCors = new V3(corsForCamera * xaxis, corsForCamera * yaxis, corsForCamera * zaxis);
+            extr = "0";
             if (viewCors.z < 1 || viewCors.z > 1000) {
                 return new Point(-100, -100);
             }
             V3 projected = Matrix.getProjected(viewCors);
             int x = (int)((projected.x + 1) / 2f * rect.Width);
-            int y = (int)((projected.y + 1) / 2f * rect.Height);
+            int y = (int)((-projected.y + 1) / 2f * rect.Height);
             Point pos = new Point(x, y);
 
-            Console.WriteLine("Axes: " + xaxis + " " + yaxis + " " + zaxis);
+
+            /*Console.WriteLine("Axes: " + xaxis + " " + yaxis + " " + zaxis);
             Console.WriteLine("Mob relative: " + (cors - playerCors));
             Console.WriteLine("View: " + viewCors);
             Console.WriteLine("Projected: " + projected);
-            Console.WriteLine("Screen: " + pos);
+            Console.WriteLine("Screen: " + pos);*/
+            //Console.WriteLine("CamRelative: " + camRelative1.normalized() + "\t" + "Player: " + playerCors);
             return pos;
 
         }
@@ -162,20 +166,22 @@ namespace SekiroNumbersMod {
                     int dPost = entities[i].post - lastEntities[i].post;
                     if (Math.Abs(dPost) > 1000000 || Math.Abs(dHp) > 1000000)
                         continue;
+
+                    //TODO: dont spawn right in the center of the screen, it causes micro stagger!
+                    string exit;
+                    Point screenCors = toScreenCors2(entities[i].cors, out exit);
+                    PointF rel = new PointF(screenCors.X / (float)rect.Width, screenCors.Y / (float)rect.Height);  //TODO: it gets multiplied and then divided remove this shit
                     if (dHp < 0) {
-                        //Point pos = toScreenCors(entities[i].cors);
-                        //PointF rel = new PointF(pos.X / (float)rect.Width, pos.Y / (float)rect.Height);
-                        addNumber(new PointF(0.48f, 0.40f), hpDamB, -dHp);  //dont spawn right in the center of the screen, it causes micro stagger!
+                        addNumber(new PointF(rel.X - 0.02f, rel.Y - 0.1f), hpDamB, -dHp); 
                     }
                     else if (dHp > 0 && dHp != entities[i].maxHp) {
-                        addNumber(new PointF(0.48f, 0.40f), hpHealB, dHp);
+                        addNumber(new PointF(rel.X - 0.02f, rel.Y - 0.1f), hpHealB, dHp);
                     }
                     if (dPost < 0) {
-                        addNumber(new PointF(0.52f, 0.40f), postDamB, -dPost);
+                        addNumber(new PointF(rel.X + 0.02f, rel.Y - 0.1f), postDamB, -dPost);
                     }
                     else if (dPost > 30 && dPost > entities[i].maxPost / 8 && dPost != entities[i].maxPost) {
-                        Console.WriteLine(dPost + " "  + entities[i].maxPost);
-                        addNumber(new PointF(0.52f, 0.40f), postHealB, dPost);
+                        addNumber(new PointF(rel.X + 0.02f, rel.Y - 0.1f), postHealB, dPost);
                     }
                 }
             }
