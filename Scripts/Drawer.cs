@@ -20,12 +20,16 @@ namespace SekiroNumbersMod {
         int hp, post, maxHp, maxPost;
         int lastHp = -1;
         int lastPost = -1;
+        Entity lockedEntity;
         V3 cors;
 
-        Number health = new Number(new PointF(0.25f, 0.92f), Color.Crimson, "");
-        Number posture = new Number(new PointF(0.5f, 0.92f), Color.Gold, "");
+        Number health = new Number(new PointF(0.25f, 0.92f), Color.Crimson);
+        Number posture = new Number(new PointF(0.5f, 0.92f), Color.Gold);
         static PointF hpPos = new PointF(0.3f, 0.85f);
         static PointF postPos = new PointF(0.5f, 0.85f);
+        Number lockedHealth = new Number(new PointF(0.25f, 0.05f), Color.Crimson);
+        Number lockedPosture = new Number(new PointF(0.5f, 0.05f), Color.Gold);
+
 
         Color postB = Color.Gold;
         Color hpB = Color.Crimson;
@@ -54,6 +58,9 @@ namespace SekiroNumbersMod {
             smallFont = new Font(fontFamily, 18);
             bigFont = new Font(fontFamily, 23);
 
+            lockedHealth.customFont = smallFont;
+            lockedPosture.customFont = smallFont;
+
             diagn.Start();
             lastHitHp.Start();
             lastHitPost.Start();
@@ -77,7 +84,6 @@ namespace SekiroNumbersMod {
             drawStatic(g);
             drawFloating(g);
             
-            
         }
 
         public Point toScreenCors2(V3 cors, out string extr) {
@@ -93,7 +99,7 @@ namespace SekiroNumbersMod {
             V3 yaxis = V3.cross(zaxis, xaxis).normalize();
 
             V3 viewCors = new V3(corsForCamera * xaxis, corsForCamera * yaxis, corsForCamera * zaxis);
-            extr = "0";
+            extr = cors.ToString();
             if (viewCors.z < 1 || viewCors.z > 1000) {
                 return new Point(-100, -100);
             }
@@ -156,34 +162,55 @@ namespace SekiroNumbersMod {
         }
 
         void updateEnemyData() {
+            lockedEntity = Entity.None;
+            V3 lockCors = DataReader.lockCoords();
+            bool locked = !lockCors.isZero();
+
             entities = DataReader.entityList(false);
             if (entities.Count == lastEntities.Count) { //enemies are same, check hp changes
                 for (int i = 0; i < entities.Count; i++) {
-                    if (entities[i].cors.isZero() || (entities[i].maxHp == maxHp && entities[i].maxPost == maxPost) || V3.distance(entities[i].cors, cors) > 35)
+                    Entity entity = entities[i];
+                    if (locked) {
+                        if (V3.distance(entity.cors, lockCors) < V3.distance(lockedEntity.cors, lockCors)) {
+                            lockedEntity = entity;
+                        }
+                    }
+                    if (entity.cors.isZero() || (entity.maxHp == maxHp && entity.maxPost == maxPost) || V3.distance(entity.cors, cors) > 35)
                         continue;
 
-                    int dHp = entities[i].hp - lastEntities[i].hp;
-                    int dPost = entities[i].post - lastEntities[i].post;
+                    int dHp = entity.hp - lastEntities[i].hp;
+                    int dPost = entity.post - lastEntities[i].post;
                     if (Math.Abs(dPost) > 1000000 || Math.Abs(dHp) > 1000000)
                         continue;
 
+
                     //TODO: dont spawn right in the center of the screen, it causes micro stagger!
                     string exit;
-                    Point screenCors = toScreenCors2(entities[i].cors, out exit);
+                    Point screenCors = toScreenCors2(entity.cors, out exit);
                     PointF rel = new PointF(screenCors.X / (float)rect.Width, screenCors.Y / (float)rect.Height);  //TODO: it gets multiplied and then divided remove this shit
                     if (dHp < 0) {
-                        addNumber(new PointF(rel.X - 0.02f, rel.Y - 0.1f), hpDamB, -dHp); 
+                        addNumber(new PointF(rel.X - 0.02f, rel.Y - 0.1f), hpDamB, -dHp);
                     }
-                    else if (dHp > 0 && dHp != entities[i].maxHp) {
+                    else if (dHp > 0 && dHp != entity.maxHp) {
                         addNumber(new PointF(rel.X - 0.02f, rel.Y - 0.1f), hpHealB, dHp);
                     }
                     if (dPost < 0) {
                         addNumber(new PointF(rel.X + 0.02f, rel.Y - 0.1f), postDamB, -dPost);
                     }
-                    else if (dPost > 30 && dPost > entities[i].maxPost / 8 && dPost != entities[i].maxPost) {
+                    else if (dPost > 30 && dPost > entity.maxPost / 8 && dPost != entity.maxPost) {
                         addNumber(new PointF(rel.X + 0.02f, rel.Y - 0.1f), postHealB, dPost);
                     }
                 }
+            }
+
+            if (locked) {
+                lockedHealth.hidden = false;
+                lockedPosture.hidden = false;
+                lockedHealth.text = Config.formatLockedHp(lockedEntity.hp, lockedEntity.maxHp);
+                lockedPosture.text = Config.formatLockedPost(lockedEntity.post, lockedEntity.maxPost);
+            } else {
+                lockedHealth.hidden = true;
+                lockedPosture.hidden = true;
             }
 
             lastEntities.Clear();
@@ -214,6 +241,8 @@ namespace SekiroNumbersMod {
         void drawStatic(Graphics g) {
             health.draw(g);
             posture.draw(g);
+            lockedHealth.draw(g);
+            lockedPosture.draw(g);
         }
 
         void drawFloating(Graphics g) {

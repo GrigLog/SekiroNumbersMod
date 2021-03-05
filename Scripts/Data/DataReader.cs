@@ -22,6 +22,7 @@ namespace SekiroNumbersMod {
         static int playerOffset = 0x3D5AAC0;
         static IntPtr cameraSmthAddress = new IntPtr(0x143D91848);
         static IntPtr mapAddress = new IntPtr(0x143D7A1E0);
+        static IntPtr hkbAddress = new IntPtr(0x143d92828);
         static int oneMoreOffset = 0x3D94970;
         static Dictionary<string, int[]> map = new Dictionary<string, int[]>() {
             {"", new int[]{} },
@@ -42,7 +43,8 @@ namespace SekiroNumbersMod {
             {"player z", new int[]{0x10, 0x5e8, 0xd8, 0x48}},
             {"camera x", new int[]{0x18, 0x30 }},
             {"camera y", new int[]{0x18, 0x34 }},
-            {"camera z", new int[]{0x18, 0x38 }}
+            {"camera z", new int[]{0x18, 0x38 }},
+            {"lock coords", new int[]{8, 0, 0x28, 0, 0x28, 0x1ff8, 0x108, 0x60}}
         };
 
         static DataReader(){
@@ -62,6 +64,15 @@ namespace SekiroNumbersMod {
             return new V3(getFloat(cameraSmthAddress, "camera x"),
                 getFloat(cameraSmthAddress, "camera y"),
                 getFloat(cameraSmthAddress, "camera z"));
+        }
+
+        public static V3 lockCoords() {
+            IntPtr lockPtr = findDataAddr(hkbAddress, map["lock coords"]);
+            byte[] data = new byte[0x160];
+            ReadProcessMemory(processPtr, read(lockPtr), data, data.Length, 0);
+            return new V3(BitConverter.ToSingle(data, 0x13c), 
+                          BitConverter.ToSingle(data, 0x14c), 
+                          BitConverter.ToSingle(data, 0x15c));
         }
 
 
@@ -97,7 +108,7 @@ namespace SekiroNumbersMod {
                             float x = BitConverter.ToSingle(corsData, 0);
                             float y = BitConverter.ToSingle(corsData, 0x10);
                             float z = BitConverter.ToSingle(corsData, 0x20);
-                            Entity e = new Entity(hp, mHp, post, mPost, new V3(x, y, z));
+                            Entity e = new Entity(hp, mHp, post, mPost, new V3(x, y, z), entityStart);
                             res.Add(e);
                             if (printCoords)
                                 Console.Write(e.cors);

@@ -4,16 +4,18 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace SekiroNumbersMod.Scripts {
     class Number {
         public PointF startPos;
         public Color color;
+        public Font customFont = null;
         public string text;
         public int value;
         public bool hidden = false;
 
-        public Number(PointF pos, Color color, string text, int value=0) {
+        public Number(PointF pos, Color color, string text="", int value=0) {
             startPos = pos;
             this.text = text;
             this.color = color;
@@ -22,12 +24,16 @@ namespace SekiroNumbersMod.Scripts {
 
         public virtual void draw(Graphics g) {
             if (!hidden) {
-                g.DrawString(text, Drawer.font, new SolidBrush(color), getPos());
+                g.DrawString(text, getFont(), new SolidBrush(color), getPos());
             }
         }
 
+        protected Font getFont() {
+            return customFont == null ? Drawer.font : customFont;
+        }
+
         protected virtual PointF getPos() {
-            return new PointF(Drawer.rect.Width * startPos.X - text.Length / 2 * Drawer.font.Size, Drawer.rect.Height * startPos.Y);
+            return new PointF(Drawer.rect.Width * startPos.X - TextRenderer.MeasureText(text, getFont()).Width / 2, Drawer.rect.Height * startPos.Y);
         }
 
         public static double distance(Number a, Number b) {
