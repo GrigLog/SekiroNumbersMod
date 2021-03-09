@@ -56,6 +56,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -65,6 +66,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Scripts\Config.cs" />
     <Compile Include="Scripts\Data\DataReader.cs" />
     <Compile Include="Scripts\Data\Entity.cs" />
@@ -72,7 +78,14 @@
     <Compile Include="Scripts\Data\V3.cs" />
     <Compile Include="Scripts\Drawer.cs" />
     <Compile Include="Scripts\FloatingNumber.cs" />
+    <Compile Include="Scripts\KeyboardHookEventArgs.cs" />
     <Compile Include="Scripts\Number.cs" />
+    <Compile Include="Scripts\OptionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Scripts\OptionsForm.Designer.cs">
+      <DependentUpon>OptionsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Scripts\Overlay.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -88,6 +101,13 @@
     <None Include="Resources\Athelas-Regular.ttf" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Scripts\OptionsForm.resx">
+      <DependentUpon>OptionsForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Scripts\Overlay.resx">
       <DependentUpon>Overlay.cs</DependentUpon>
     </EmbeddedResource>

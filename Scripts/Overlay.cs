@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SekiroNumbersMod.Scripts;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,6 +14,7 @@ namespace SekiroNumbersMod {
     public partial class Overlay : Form {
         Rectangle temp;
         Drawer d;
+        KeyboardHook keyboardHook = new KeyboardHook();
         public Overlay() {
             InitializeComponent();
             
@@ -24,7 +26,15 @@ namespace SekiroNumbersMod {
 
             TopMost = true;
             ShowInTaskbar = false;
+
+            keyboardHook.KeyboardPressed += keyDown;
             d = new Drawer();
+        }
+
+        void keyDown(object sender, KeyboardHookEventArgs e) {
+            if (e.KeyboardState == KeyboardHook.KeyboardState.KeyDown && e.KeyboardData.VirtualCode == 0x72) { //F3 virtual code
+                (new OptionsForm()).ShowDialog();
+            }
         }
 
         private void timer1_Tick(object sender, EventArgs e) {
@@ -43,5 +53,9 @@ namespace SekiroNumbersMod {
 
         [DllImport("user32.dll")]
         public static extern bool GetWindowRect(IntPtr hwnd, out Rectangle lpRect);
+
+        private void Overlay_Load(object sender, EventArgs e) {
+
+        }
     }
 }

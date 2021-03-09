@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace SekiroNumbersMod {
     class Drawer {
@@ -50,9 +51,14 @@ namespace SekiroNumbersMod {
 
         public Drawer() {
             string workingDir = Environment.CurrentDirectory;
-            string projDir = Directory.GetParent(workingDir).Parent.Parent.FullName;
             PrivateFontCollection collection = new PrivateFontCollection();
-            collection.AddFontFile(projDir + "\\Resources\\Athelas-Regular.ttf");
+            Console.WriteLine(Application.ExecutablePath);
+            if (workingDir.EndsWith("Sekiro")) {
+                collection.AddFontFile(workingDir + "\\NumbersMod\\Athelas-Regular.ttf");
+            } else {
+                string projDir = Directory.GetParent(workingDir).Parent.Parent.FullName;
+                collection.AddFontFile(projDir + "\\Resources\\Athelas-Regular.ttf");
+            }
             fontFamily = new FontFamily("Athelas", collection);
             font = new Font(fontFamily, 20, FontStyle.Bold);
             smallFont = new Font(fontFamily, 18);
