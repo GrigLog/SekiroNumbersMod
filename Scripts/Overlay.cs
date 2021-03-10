@@ -28,6 +28,7 @@ namespace SekiroNumbersMod {
             ShowInTaskbar = false;
 
             keyboardHook.KeyboardPressed += keyDown;
+            updateRect();
             d = new Drawer();
         }
 
@@ -43,12 +44,16 @@ namespace SekiroNumbersMod {
         }
 
         private void Overlay_Paint(object sender, PaintEventArgs e) {
+            updateRect();
+            d.draw(e.Graphics);
+            
+        }
+
+        void updateRect() {
             GetWindowRect(Program.window, out temp);
             temp = new Rectangle(temp.X, temp.Y, temp.Width - temp.X, temp.Height - temp.Y);
             Bounds = temp;
             Drawer.rect = temp;
-            d.draw(e.Graphics);
-            
         }
 
         [DllImport("user32.dll")]

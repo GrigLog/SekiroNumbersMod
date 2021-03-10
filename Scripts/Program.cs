@@ -12,7 +12,7 @@ namespace SekiroNumbersMod {
         public static Process process;
         public static IntPtr window;
         static void Main(string[] args) {
-            //Thad.Sleep(20000);
+            //Thread.Sleep(20000);
             Console.WriteLine("Searching for sekiro process...");
             while (Process.GetProcessesByName("sekiro").Length == 0) {
                 Thread.Sleep(100);

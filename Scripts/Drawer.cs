@@ -60,9 +60,10 @@ namespace SekiroNumbersMod {
                 collection.AddFontFile(projDir + "\\Resources\\Athelas-Regular.ttf");
             }
             fontFamily = new FontFamily("Athelas", collection);
-            font = new Font(fontFamily, 20, FontStyle.Bold);
-            smallFont = new Font(fontFamily, 18);
-            bigFont = new Font(fontFamily, 23);
+            int fontsize = (int)(rect.Height * 20f / 720f);
+            font = new Font(fontFamily, fontsize, FontStyle.Bold);
+            smallFont = new Font(fontFamily, fontsize - 2);
+            bigFont = new Font(fontFamily, fontsize + 3);
 
             lockedHealth.customFont = smallFont;
             lockedPosture.customFont = smallFont;

@@ -31,7 +31,7 @@ namespace SekiroNumbersMod.Scripts {
         }
 
         public static void updateFromFile() {
-            StreamReader sr = new StreamReader("config.txt");
+            StreamReader sr = new StreamReader("NumbersMod\\config.txt");
             string line;
             while ((line = sr.ReadLine()) != null) {
                 string[] parts = line.Split(':');

@@ -41,7 +41,7 @@ namespace SekiroNumbersMod.Scripts {
         }
 
         void updateFile() {
-            sw = new StreamWriter("config.txt");
+            sw = new StreamWriter("NumbersMod\\config.txt");
             sw.WriteLine("SelfStats:" + playerList.SelectedItem);
             sw.WriteLine("LockedStats:" + lockedList.SelectedItem);
             sw.WriteLine("DamageNumbers:" + damageList.SelectedItem);
