@@ -31,6 +31,7 @@ namespace SekiroNumbersMod.Scripts {
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.commitButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // playerList
@@ -49,7 +50,6 @@ namespace SekiroNumbersMod.Scripts {
             this.playerList.Name = "playerList";
             this.playerList.Size = new System.Drawing.Size(121, 21);
             this.playerList.TabIndex = 0;
-            this.playerList.SelectedIndexChanged += new System.EventHandler(this.playerList_SelectedIndexChanged);
             // 
             // lockedList
             // 
@@ -67,7 +67,6 @@ namespace SekiroNumbersMod.Scripts {
             this.lockedList.Name = "lockedList";
             this.lockedList.Size = new System.Drawing.Size(121, 21);
             this.lockedList.TabIndex = 1;
-            this.lockedList.SelectedIndexChanged += new System.EventHandler(this.lockedList_SelectedIndexChanged);
             // 
             // damageList
             // 
@@ -85,7 +84,6 @@ namespace SekiroNumbersMod.Scripts {
             this.damageList.Name = "damageList";
             this.damageList.Size = new System.Drawing.Size(121, 21);
             this.damageList.TabIndex = 2;
-            this.damageList.SelectedIndexChanged += new System.EventHandler(this.damageList_SelectedIndexChanged);
             // 
             // label1
             // 
@@ -126,11 +124,22 @@ namespace SekiroNumbersMod.Scripts {
             this.label4.TabIndex = 5;
             this.label4.Text = "Damage numbers";
             // 
+            // commitButton
+            // 
+            this.commitButton.Location = new System.Drawing.Point(146, 220);
+            this.commitButton.Name = "commitButton";
+            this.commitButton.Size = new System.Drawing.Size(75, 23);
+            this.commitButton.TabIndex = 6;
+            this.commitButton.Text = "OK";
+            this.commitButton.UseVisualStyleBackColor = true;
+            this.commitButton.Click += new System.EventHandler(this.commitButton_Click);
+            // 
             // OptionsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(386, 460);
+            this.Controls.Add(this.commitButton);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -156,5 +165,6 @@ namespace SekiroNumbersMod.Scripts {
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button commitButton;
     }
 }

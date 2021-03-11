@@ -17,10 +17,6 @@ namespace SekiroNumbersMod.Scripts {
             InitializeComponent();
         }
 
-        protected override void OnFormClosed(FormClosedEventArgs e) {
-            base.OnFormClosed(e);
-        }
-
         private void OptionsForm_Load(object sender, EventArgs e) {
             Config.updateFromFile();
             playerList.Text = Config.selfVals.ToString();
@@ -28,23 +24,11 @@ namespace SekiroNumbersMod.Scripts {
             damageList.Text = Config.damageVals.ToString();
         }
 
-        private void playerList_SelectedIndexChanged(object sender, EventArgs e) {
-            updateFile();
-        }
-
-        private void lockedList_SelectedIndexChanged(object sender, EventArgs e) {
-            updateFile();
-        }
-
-        private void damageList_SelectedIndexChanged(object sender, EventArgs e) {
-            updateFile();
-        }
-
-        void updateFile() {
+        private void commitButton_Click(object sender, EventArgs e) {
             sw = new StreamWriter("NumbersMod\\config.txt");
-            sw.WriteLine("SelfStats:" + playerList.SelectedItem);
-            sw.WriteLine("LockedStats:" + lockedList.SelectedItem);
-            sw.WriteLine("DamageNumbers:" + damageList.SelectedItem);
+            sw.WriteLine("SelfStats:" + playerList.Text);
+            sw.WriteLine("LockedStats:" + lockedList.Text);
+            sw.WriteLine("DamageNumbers:" + damageList.Text);
             sw.Close();
             Config.updateFromFile();
         }
