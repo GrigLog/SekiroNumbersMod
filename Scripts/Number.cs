@@ -12,14 +12,12 @@ namespace SekiroNumbersMod.Scripts {
         public Color color;
         public Font customFont = null;
         public string text;
-        public int value;
         public bool hidden = false;
 
-        public Number(PointF pos, Color color, string text="", int value=0) {
+        public Number(PointF pos, Color color, string text="") {
             startPos = pos;
             this.text = text;
             this.color = color;
-            this.value = value;
         }
 
         public virtual void draw(Graphics g) {

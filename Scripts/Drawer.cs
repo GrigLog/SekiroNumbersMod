@@ -6,10 +6,8 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Math;
 
 namespace SekiroNumbersMod {
     class Drawer {
@@ -22,7 +20,9 @@ namespace SekiroNumbersMod {
         int lastHp = -1;
         int lastPost = -1;
         Entity lockedEntity;
-        V3 cors;
+        static V3 playerCors;
+        static V3 camCors;
+
 
         Number health = new Number(new PointF(0.25f, 0.92f), Color.Crimson);
         Number posture = new Number(new PointF(0.5f, 0.92f), Color.Gold);
@@ -93,11 +93,10 @@ namespace SekiroNumbersMod {
             
         }
 
-        public Point toScreenCors2(V3 cors, out string extr) {
-            V3 camRelative1 = DataReader.cameraCoords();
+        public static PointF toScreenCors(V3 cors) {
+            V3 camRelative1 = camCors;
             camRelative1.y = camRelative1.y * 1.95f;
             V3 camRelative = Matrix.rotateY(camRelative1, -55.15 / 57.2956) * 2;
-            V3 playerCors = DataReader.coords();
 
             V3 camGlobal = playerCors + camRelative;
             V3 corsForCamera = cors - camGlobal;
@@ -106,28 +105,23 @@ namespace SekiroNumbersMod {
             V3 yaxis = V3.cross(zaxis, xaxis).normalize();
 
             V3 viewCors = new V3(corsForCamera * xaxis, corsForCamera * yaxis, corsForCamera * zaxis);
-            extr = cors.ToString();
             if (viewCors.z < 1 || viewCors.z > 1000) {
                 return new Point(-100, -100);
             }
-            V3 projected = Matrix.getProjected(viewCors);
-            int x = (int)((projected.x + 1) / 2f * rect.Width);
-            int y = (int)((-projected.y + 1) / 2f * rect.Height);
-            Point pos = new Point(x, y);
-
-
-            /*Console.WriteLine("Axes: " + xaxis + " " + yaxis + " " + zaxis);
-            Console.WriteLine("Mob relative: " + (cors - playerCors));
-            Console.WriteLine("View: " + viewCors);
-            Console.WriteLine("Projected: " + projected);
-            Console.WriteLine("Screen: " + pos);*/
-            //Console.WriteLine("CamRelative: " + camRelative1.normalized() + "\t" + "Player: " + playerCors);
-            return pos;
+            double near = 1;
+            double far = 1000;
+            double fovx = 1.347; //in radians?...
+            double fovy = 1;
+            V3 projected = new V3(viewCors.x / Tan(fovx / 2) / viewCors.z, viewCors.y / Tan(fovy / 2) / viewCors.z, ((far + near) + 2 * near * far / -viewCors.z) / (near - far));
+            float x = (projected.x + 1) / 2f;
+            float y = (-projected.y + 1) / 2f;
+            return new PointF(x, y);
 
         }
 
         void updatePlayerData() {
-            cors = DataReader.coords();
+            playerCors = DataReader.coords();
+            camCors = DataReader.cameraCoords();
             hp = DataReader.getHealth();
             post = DataReader.getPosture();
             maxHp = DataReader.getMaxHealth();
@@ -182,7 +176,7 @@ namespace SekiroNumbersMod {
                             lockedEntity = entity;
                         }
                     }
-                    if (entity.cors.isZero() || (entity.maxHp == maxHp && entity.maxPost == maxPost) || V3.distance(entity.cors, cors) > 35)
+                    if (entity.cors.isZero() || (entity.maxHp == maxHp && entity.maxPost == maxPost) || V3.distance(entity.cors, playerCors) > 35)
                         continue;
 
                     int dHp = entity.hp - lastEntities[i].hp;
@@ -192,20 +186,18 @@ namespace SekiroNumbersMod {
 
 
                     //TODO: dont spawn right in the center of the screen, it causes micro stagger!
-                    string exit;
-                    Point screenCors = toScreenCors2(entity.cors, out exit);
-                    PointF rel = new PointF(screenCors.X / (float)rect.Width, screenCors.Y / (float)rect.Height);  //TODO: it gets multiplied and then divided remove this shit
+                    PointF screenCors = toScreenCors(entity.cors);
                     if (dHp < 0) {
-                        addNumber(new PointF(rel.X - 0.02f, rel.Y - 0.1f), hpDamB, -dHp);
+                        addNumber(new PointF(screenCors.X - 0.02f, screenCors.Y - 0.1f), hpDamB, -dHp);
                     }
                     else if (dHp > 0 && dHp != entity.maxHp) {
-                        addNumber(new PointF(rel.X - 0.02f, rel.Y - 0.1f), hpHealB, dHp);
+                        addNumber(new PointF(screenCors.X - 0.02f, screenCors.Y - 0.1f), hpHealB, dHp);
                     }
                     if (dPost < 0) {
-                        addNumber(new PointF(rel.X + 0.02f, rel.Y - 0.1f), postDamB, -dPost);
+                        addNumber(new PointF(screenCors.X + 0.02f, screenCors.Y - 0.1f), postDamB, -dPost);
                     }
                     else if (dPost > 30 && dPost > entity.maxPost / 8 && dPost != entity.maxPost) {
-                        addNumber(new PointF(rel.X + 0.02f, rel.Y - 0.1f), postHealB, dPost);
+                        addNumber(new PointF(screenCors.X + 0.02f, screenCors.Y - 0.1f), postHealB, dPost);
                     }
                 }
             }
@@ -228,14 +220,14 @@ namespace SekiroNumbersMod {
         void addNumber(PointF pos, Color color, int value, bool combo = false) {
             FloatingNumber n;
             if (color == hpHealB || color == hpDamB) {
-                n = new FloatingNumber(pos, color, Config.formatHpDam(value), value);
+                n = new FloatingNumber(pos, color, Config.formatHpDam(value)) { value = value };
             } else {
-                n = new FloatingNumber(pos, color, Config.formatPostDam(value), value);
+                n = new FloatingNumber(pos, color, Config.formatPostDam(value)) { value = value };
             }
             if (combo)
                 n.big = 5;
             foreach (var e in numbers.ToArray()) {
-                if (e.color == n.color && e.counter <= 20 && Number.distance(e, n) <= 50) {  //merge two close numbers
+                if (e.color == n.color && e.counter <= 17 && e.entity == n.entity) {  //merge two close numbers
                     numbers.Remove(e);
                     addNumber(pos, color, value + e.value, true);
                     return;

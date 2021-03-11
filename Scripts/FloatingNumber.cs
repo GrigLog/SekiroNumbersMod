@@ -8,10 +8,17 @@ using System.Threading.Tasks;
 namespace SekiroNumbersMod.Scripts {
     class FloatingNumber : Number {
         public int counter;
-        public int lifetime;
+        public int lifetime = 30;
+        public int value;
         public int big;
-        public FloatingNumber(PointF pos, Color color, string text, int value=0, int lifetime=30) : base(pos, color, text, value) {
-            this.lifetime = lifetime;
+        public Entity entity;
+
+
+        public FloatingNumber(PointF pos, Color color, string text) : base(pos, color, text) {
+        }
+
+        public FloatingNumber(Entity entity, Color color, string text) : base(new PointF(), color, text){
+            startPos = Drawer.toScreenCors(entity.cors);
         }
 
         public override void draw(Graphics g) {

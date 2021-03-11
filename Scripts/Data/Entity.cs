@@ -18,5 +18,13 @@ namespace SekiroNumbersMod {
         public bool isNone() {
             return address.ToInt64() == -1;
         }
+
+        public static bool operator==(Entity a, Entity b) {
+            return a.address == b.address;
+        }
+
+        public static bool operator!=(Entity a, Entity b) {
+            return !(a == b);
+        }
     }
 }
