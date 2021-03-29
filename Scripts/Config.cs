@@ -14,6 +14,7 @@ namespace SekiroNumbersMod.Scripts {
         public static NumbersMode damageVals = NumbersMode.RELATIVE;
         public static NumbersMode selfVals = NumbersMode.RELATIVE;
         public static NumbersMode lockedVals = NumbersMode.RELATIVE;
+        public static NumbersMode statusVals = NumbersMode.ABSOLUTE;
         static Dictionary<string, string> fileToCodeNames = new Dictionary<string, string> 
         { { "SelfStats", "selfVals" }, { "LockedStats", "lockedVals" }, { "DamageNumbers", "damageVals" } };
 
@@ -102,6 +103,36 @@ namespace SekiroNumbersMod.Scripts {
                     return round((float)v / DataReader.basePostDamage()) + "x / " + round((float)max / DataReader.basePostDamage()) + "x";
             }
             return "";
+        }
+
+
+
+        public static string formatLockedPoison(int v, int max) {
+            switch (lockedVals) {
+                case NumbersMode.ABSOLUTE:
+                    return v + " / " + max;
+                case NumbersMode.RELATIVE:
+                    return round(v / 31f) + "x /" + round(max / 31f) + "x";
+            }
+            return "";
+        }
+
+        public static string formatLockedFire(int v, int max) {
+            switch (lockedVals) {
+                case NumbersMode.ABSOLUTE:
+                    return v + " / " + max;
+                case NumbersMode.RELATIVE:
+                    return round(v / 31f) + "x / " + round(max / 31f) + "x";
+            }
+            return "";
+        }
+
+        public static string formatPoisonDam(int v) {
+            return v.ToString();
+        }
+
+        public static string formatFireDam(int v) {
+            return v.ToString();
         }
 
         static double round(float a) {

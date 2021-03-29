@@ -17,11 +17,21 @@ namespace SekiroNumbersMod {
 
 
         int hp, post, maxHp, maxPost;
+        int baseDamage;
         int lastHp = -1;
         int lastPost = -1;
         Entity lockedEntity;
         static V3 playerCors;
         static V3 camCors;
+
+        Color postC = Color.Gold;
+        Color hpC = Color.Crimson;
+        Color hpHealC = Color.LightGreen;
+        Color hpDamC = Color.Red;
+        Color postHealC = Color.Aquamarine;
+        Color postDamC = Color.Orange;
+        static Color poisonDamC = Color.Green;
+        static Color fireDamC = Color.FromArgb(255, 0xf7, 0x5e, 0x25);
 
 
         Number health = new Number(new PointF(0.25f, 0.92f), Color.Crimson);
@@ -30,15 +40,11 @@ namespace SekiroNumbersMod {
         static PointF postPos = new PointF(0.5f, 0.85f);
         Number lockedHealth = new Number(new PointF(0.25f, 0.05f), Color.Crimson);
         Number lockedPosture = new Number(new PointF(0.5f, 0.05f), Color.Gold);
+        Number lockedPoison = new Number(new PointF(0.75f, 0.05f), poisonDamC);
+        Number lockedFire = new Number(new PointF(0.75f, 0.08f), fireDamC);
 
 
-        Color postB = Color.Gold;
-        Color hpB = Color.Crimson;
-        Color hpHealB = Color.LightGreen;
-        Color hpDamB = Color.Red;
-        Color postHealB = Color.Aquamarine;
-        Color postDamB = Color.Orange;
-
+       
         List<Entity> entities = new List<Entity>();
         List<Entity> lastEntities = new List<Entity>();
 
@@ -67,6 +73,8 @@ namespace SekiroNumbersMod {
 
             lockedHealth.customFont = smallFont;
             lockedPosture.customFont = smallFont;
+            lockedPoison.customFont = smallFont;
+            lockedFire.customFont = smallFont;
 
             diagn.Start();
             lastHitHp.Start();
@@ -131,20 +139,20 @@ namespace SekiroNumbersMod {
             int dPost = post - lastPost;
             if (dHp != 0 && lastHp != -1) {
                 if (dHp > 0) {
-                    numbers.Add(new FloatingNumber(hpPos, hpHealB, Config.formatSelfHp(dHp)));
+                    numbers.Add(new FloatingNumber(hpPos, hpHealC, Config.formatSelfHp(dHp)));
                 }
                 else if (dHp < 0) {
-                    numbers.Add(new FloatingNumber(hpPos, hpDamB, Config.formatSelfHp(-dHp)));
+                    numbers.Add(new FloatingNumber(hpPos, hpDamC, Config.formatSelfHp(-dHp)));
                     lastHitHp.Restart();
                     health.hidden = false;
                 }
             }
             if (dPost != 0 && lastPost != -1) {
                 if (dPost > 30 && dPost != maxPost) {
-                    numbers.Add(new FloatingNumber(postPos, postHealB, Config.formatSelfPost(dPost)));
+                    numbers.Add(new FloatingNumber(postPos, postHealC, Config.formatSelfPost(dPost)));
                 }
                 else if (dPost < 0) {
-                    numbers.Add(new FloatingNumber(postPos, postDamB, Config.formatSelfPost(-dPost)));
+                    numbers.Add(new FloatingNumber(postPos, postDamC, Config.formatSelfPost(-dPost)));
                     lastHitPost.Restart();
                     posture.hidden = false;
                 }
@@ -176,11 +184,13 @@ namespace SekiroNumbersMod {
                             lockedEntity = entity;
                         }
                     }
-                    if (entity.cors.isZero() || (entity.maxHp == maxHp && entity.maxPost == maxPost) || V3.distance(entity.cors, playerCors) > 35)
+                    if (entity.cors.isZero() || (entity.d.maxHp == maxHp && entity.d.maxPost == maxPost) || V3.distance(entity.cors, playerCors) > 35)
                         continue;
 
-                    int dHp = entity.hp - lastEntities[i].hp;
-                    int dPost = entity.post - lastEntities[i].post;
+                    int dHp = entity.d.hp - lastEntities[i].d.hp;
+                    int dPost = entity.d.post - lastEntities[i].d.post;
+                    int dPsn = entity.res.poison - lastEntities[i].res.poison;
+                    int dFire = entity.res.fire - lastEntities[i].res.fire;
                     if (Math.Abs(dPost) > 1000000 || Math.Abs(dHp) > 1000000)
                         continue;
 
@@ -188,16 +198,21 @@ namespace SekiroNumbersMod {
                     //TODO: dont spawn right in the center of the screen, it causes micro stagger!
                     PointF screenCors = toScreenCors(entity.cors);
                     if (dHp < 0) {
-                        addNumber(new PointF(screenCors.X - 0.02f, screenCors.Y - 0.1f), hpDamB, -dHp);
-                    }
-                    else if (dHp > 0 && dHp != entity.maxHp) {
-                        addNumber(new PointF(screenCors.X - 0.02f, screenCors.Y - 0.1f), hpHealB, dHp);
+                        addNumber(new PointF(screenCors.X - 0.02f, screenCors.Y - 0.1f), hpDamC, -dHp);
+                        Console.WriteLine(entity.address);
+                    } else if (dHp > 0 && dHp != entity.d.maxHp) {
+                        addNumber(new PointF(screenCors.X - 0.02f, screenCors.Y - 0.1f), hpHealC, dHp);
                     }
                     if (dPost < 0) {
-                        addNumber(new PointF(screenCors.X + 0.02f, screenCors.Y - 0.1f), postDamB, -dPost);
+                        addNumber(new PointF(screenCors.X + 0.02f, screenCors.Y - 0.1f), postDamC, -dPost);
+                    } else if (dPost > 30 && dPost > entity.d.maxPost / 8 && dPost != entity.d.maxPost) {
+                        addNumber(new PointF(screenCors.X + 0.02f, screenCors.Y - 0.1f), postHealC, dPost);
                     }
-                    else if (dPost > 30 && dPost > entity.maxPost / 8 && dPost != entity.maxPost) {
-                        addNumber(new PointF(screenCors.X + 0.02f, screenCors.Y - 0.1f), postHealB, dPost);
+                    if (dPsn < 0) {
+                        addNumber(new PointF(screenCors.X, screenCors.Y + 0.01f), poisonDamC, -dPsn);
+                    }
+                    if (dFire < 0) {
+                        addNumber(new PointF(screenCors.X, screenCors.Y + 0.01f), fireDamC, -dFire);
                     }
                 }
             }
@@ -205,11 +220,17 @@ namespace SekiroNumbersMod {
             if (locked) {
                 lockedHealth.hidden = false;
                 lockedPosture.hidden = false;
-                lockedHealth.text = Config.formatLockedHp(lockedEntity.hp, lockedEntity.maxHp);
-                lockedPosture.text = Config.formatLockedPost(lockedEntity.post, lockedEntity.maxPost);
+                lockedPoison.hidden = false;
+                lockedFire.hidden = false;
+                lockedHealth.text = Config.formatLockedHp(lockedEntity.d.hp, lockedEntity.d.maxHp);
+                lockedPosture.text = Config.formatLockedPost(lockedEntity.d.post, lockedEntity.d.maxPost);
+                lockedPoison.text = Config.formatLockedPoison(lockedEntity.res.poison, lockedEntity.res.maxPoison);
+                lockedFire.text = Config.formatLockedPoison(lockedEntity.res.fire, lockedEntity.res.maxFire);
             } else {
                 lockedHealth.hidden = true;
                 lockedPosture.hidden = true;
+                lockedPoison.hidden = true;
+                lockedFire.hidden = true;
             }
 
             lastEntities.Clear();
@@ -219,10 +240,14 @@ namespace SekiroNumbersMod {
 
         void addNumber(PointF pos, Color color, int value, bool combo = false) {
             FloatingNumber n;
-            if (color == hpHealB || color == hpDamB) {
+            if (color == hpHealC || color == hpDamC) {
                 n = new FloatingNumber(pos, color, Config.formatHpDam(value)) { value = value };
-            } else {
+            } else if (color == postHealC || color == postDamC) {
                 n = new FloatingNumber(pos, color, Config.formatPostDam(value)) { value = value };
+            } else if (color == poisonDamC) {
+                n = new FloatingNumber(pos, color, Config.formatPoisonDam(value)) { value = value };
+            } else {
+                n = new FloatingNumber(pos, color, Config.formatFireDam(value)) { value = value };
             }
             if (combo)
                 n.big = 5;
@@ -242,6 +267,8 @@ namespace SekiroNumbersMod {
             posture.draw(g);
             lockedHealth.draw(g);
             lockedPosture.draw(g);
+            lockedPoison.draw(g);
+            lockedFire.draw(g);
         }
 
         void drawFloating(Graphics g) {

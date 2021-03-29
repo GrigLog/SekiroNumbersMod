@@ -17,7 +17,7 @@ namespace SekiroNumbersMod {
 
         //declared here to optimize calculations
         static byte[] buffer = new byte[8];
-        static IntPtr mapPtr, areaPtr, entityDecorPtr, hpPtr, corsPtr;
+        static IntPtr mapPtr, areaPtr, entityDecorPtr, hpPtr, corsPtr, psPtr;
 
         static int playerOffset = 0x3D5AAC0;
         static IntPtr cameraSmthAddress = new IntPtr(0x143D91848);
@@ -34,10 +34,8 @@ namespace SekiroNumbersMod {
             {"attack power", new int[]{0x8, 0x48}},
             {"areas", new int[] {0x518}},
             {"entity hp", new int[] {0x1ff8, 0x18, 0x130}},
-            {"entity post", new int[] {0x1ff8, 0x18, 0x148}},
+            {"entity poison", new int[] {0x1ff8, 0x20, 0x10}},
             {"entity x", new int[] {0x98, 0xc}},
-            {"entity y", new int[] {0x98, 0x1c}},
-            {"entity z", new int[] {0x98, 0x2c}},
             {"player x", new int[]{0x10, 0x5e8, 0xd8, 0x40}},
             {"player y", new int[]{0x10, 0x5e8, 0xd8, 0x44}},
             {"player z", new int[]{0x10, 0x5e8, 0xd8, 0x48}},
@@ -96,19 +94,33 @@ namespace SekiroNumbersMod {
                         if (entityStart != IntPtr.Zero) {
                             hpPtr = findDataAddr(entityDecorPtr, map["entity hp"]);
                             corsPtr = findDataAddr(entityDecorPtr, map["entity x"]);
+                            psPtr = findDataAddr(entityDecorPtr, map["entity poison"]);
+
                             byte[] hpData = new byte[0x20];
                             ReadProcessMemory(processPtr, hpPtr, hpData, hpData.Length, 0);
                             int hp = BitConverter.ToInt32(hpData, 0);
                             int mHp = BitConverter.ToInt32(hpData, 4);
                             int post = BitConverter.ToInt32(hpData, 0x18);
                             int mPost = BitConverter.ToInt32(hpData, 0x1c);
+                            Entity.Data data = new Entity.Data(hp, mHp, post, mPost);
 
                             byte[] corsData = new byte[0x30];
                             ReadProcessMemory(processPtr, corsPtr, corsData, corsData.Length, 0);
                             float x = BitConverter.ToSingle(corsData, 0);
                             float y = BitConverter.ToSingle(corsData, 0x10);
                             float z = BitConverter.ToSingle(corsData, 0x20);
-                            Entity e = new Entity(hp, mHp, post, mPost, new V3(x, y, z), entityStart);
+                            V3 cors = new V3(x, y, z);
+
+                            byte[] resData = new byte[0x30];
+                            ReadProcessMemory(processPtr, psPtr, resData, resData.Length, 0);
+                            int poison = BitConverter.ToInt32(resData, 0);
+                            int fire = BitConverter.ToInt32(resData, 8);
+                            int mPoison = BitConverter.ToInt32(resData, 0x14);
+                            int mFire = BitConverter.ToInt32(resData, 0x1c);
+                            Entity.Resist resist = new Entity.Resist(poison, mPoison, fire, mFire);
+
+
+                            Entity e = new Entity(data, resist, cors, entityStart);
                             res.Add(e);
                             if (printCoords)
                                 Console.Write(e.cors);
