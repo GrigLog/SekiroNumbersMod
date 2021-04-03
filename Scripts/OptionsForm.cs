@@ -22,13 +22,15 @@ namespace SekiroNumbersMod.Scripts {
             playerList.Text = Config.selfVals.ToString();
             lockedList.Text = Config.lockedVals.ToString();
             damageList.Text = Config.damageVals.ToString();
+            resistList.Text = Config.status ? "yes" : "no";
         }
 
         private void commitButton_Click(object sender, EventArgs e) {
             sw = new StreamWriter("NumbersMod\\config.txt");
-            sw.WriteLine("SelfStats:" + playerList.Text);
-            sw.WriteLine("LockedStats:" + lockedList.Text);
-            sw.WriteLine("DamageNumbers:" + damageList.Text);
+            sw.WriteLine("Self Stats:" + playerList.Text);
+            sw.WriteLine("Locked Stats:" + lockedList.Text);
+            sw.WriteLine("Damage Numbers:" + damageList.Text);
+            sw.WriteLine("Resistances:" + resistList.Text);
             sw.Close();
             Config.updateFromFile();
         }

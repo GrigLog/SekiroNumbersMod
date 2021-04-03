@@ -111,6 +111,7 @@ namespace SekiroNumbersMod {
                             float z = BitConverter.ToSingle(corsData, 0x20);
                             V3 cors = new V3(x, y, z);
 
+                            //TODO: resistances can be picked from Data, check performance
                             byte[] resData = new byte[0x30];
                             ReadProcessMemory(processPtr, psPtr, resData, resData.Length, 0);
                             int poison = BitConverter.ToInt32(resData, 0);

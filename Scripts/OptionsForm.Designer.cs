@@ -32,6 +32,8 @@ namespace SekiroNumbersMod.Scripts {
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.commitButton = new System.Windows.Forms.Button();
+            this.label5 = new System.Windows.Forms.Label();
+            this.resistList = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // playerList
@@ -126,7 +128,7 @@ namespace SekiroNumbersMod.Scripts {
             // 
             // commitButton
             // 
-            this.commitButton.Location = new System.Drawing.Point(146, 220);
+            this.commitButton.Location = new System.Drawing.Point(143, 279);
             this.commitButton.Name = "commitButton";
             this.commitButton.Size = new System.Drawing.Size(75, 23);
             this.commitButton.TabIndex = 6;
@@ -134,11 +136,38 @@ namespace SekiroNumbersMod.Scripts {
             this.commitButton.UseVisualStyleBackColor = true;
             this.commitButton.Click += new System.EventHandler(this.commitButton_Click);
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label5.Location = new System.Drawing.Point(21, 183);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(97, 20);
+            this.label5.TabIndex = 7;
+            this.label5.Text = "Resistances";
+            // 
+            // resistList
+            // 
+            this.resistList.AutoCompleteCustomSource.AddRange(new string[] {
+            "yes",
+            "no"});
+            this.resistList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.resistList.FormattingEnabled = true;
+            this.resistList.Items.AddRange(new object[] {
+            "yes",
+            "no"});
+            this.resistList.Location = new System.Drawing.Point(206, 185);
+            this.resistList.Name = "resistList";
+            this.resistList.Size = new System.Drawing.Size(121, 21);
+            this.resistList.TabIndex = 8;
+            // 
             // OptionsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(386, 460);
+            this.Controls.Add(this.resistList);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.commitButton);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
@@ -166,5 +195,7 @@ namespace SekiroNumbersMod.Scripts {
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button commitButton;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ComboBox resistList;
     }
 }

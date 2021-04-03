@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SekiroNumbersMod.Scripts;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace SekiroNumbersMod {
         public static IntPtr window;
         static void Main(string[] args) {
             //Thread.Sleep(20000);
+            Config.updateFromFile();
             Console.WriteLine("Searching for sekiro process...");
             while (Process.GetProcessesByName("sekiro").Length == 0) {
                 Thread.Sleep(100);
@@ -22,7 +24,6 @@ namespace SekiroNumbersMod {
             window = process.MainWindowHandle;
 
             Console.WriteLine("Starting an overlay.");
-
             Application.Run(new Overlay());
         }
     }

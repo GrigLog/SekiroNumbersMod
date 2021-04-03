@@ -15,10 +15,11 @@ namespace SekiroNumbersMod.Scripts {
         public static NumbersMode selfVals = NumbersMode.RELATIVE;
         public static NumbersMode lockedVals = NumbersMode.RELATIVE;
         public static NumbersMode statusVals = NumbersMode.ABSOLUTE;
+        public static bool status = true;
         static Dictionary<string, string> fileToCodeNames = new Dictionary<string, string> 
-        { { "SelfStats", "selfVals" }, { "LockedStats", "lockedVals" }, { "DamageNumbers", "damageVals" } };
+        { { "Self Stats", "selfVals" }, { "Locked Stats", "lockedVals" }, { "Damage Numbers", "damageVals" }, {"Resistances", "status" } };
 
-        public static NumbersMode parseMode(string s) {
+        public static object parse(string s) {
             switch (s) {
                 case "relative":
                     return NumbersMode.RELATIVE;
@@ -26,6 +27,10 @@ namespace SekiroNumbersMod.Scripts {
                     return NumbersMode.ABSOLUTE;
                 case "off":
                     return NumbersMode.OFF;
+                case "yes":
+                    return true;
+                case "no":
+                    return false;
                 default:
                     return NumbersMode.RELATIVE;
             }
@@ -39,7 +44,7 @@ namespace SekiroNumbersMod.Scripts {
                 if (fileToCodeNames.ContainsKey(parts[0])) {
                     string fieldName = fileToCodeNames[parts[0]];
                     FieldInfo field = typeof(Config).GetField(fieldName, BindingFlags.Static | BindingFlags.Public);
-                    field.SetValue(null, parseMode(parts[1]));
+                    field.SetValue(null, parse(parts[1]));
                 }
             }
             sr.Close();
@@ -108,31 +113,35 @@ namespace SekiroNumbersMod.Scripts {
 
 
         public static string formatLockedPoison(int v, int max) {
-            switch (lockedVals) {
-                case NumbersMode.ABSOLUTE:
-                    return v + " / " + max;
-                case NumbersMode.RELATIVE:
-                    return round(v / 31f) + "x /" + round(max / 31f) + "x";
+            if (status) {
+                switch (lockedVals) {
+                    case NumbersMode.ABSOLUTE:
+                        return v + " / " + max;
+                    case NumbersMode.RELATIVE:
+                        return round(v / 31f) + "x /" + round(max / 31f) + "x";
+                }
             }
             return "";
         }
 
         public static string formatLockedFire(int v, int max) {
-            switch (lockedVals) {
-                case NumbersMode.ABSOLUTE:
-                    return v + " / " + max;
-                case NumbersMode.RELATIVE:
-                    return round(v / 31f) + "x / " + round(max / 31f) + "x";
+            return formatLockedPoison(v, max);
+        }
+
+        public static string formatPoisonDam(int v) {
+            if (status) {
+                switch (damageVals) {
+                    case NumbersMode.ABSOLUTE:
+                        return v.ToString();
+                    case NumbersMode.RELATIVE:
+                        return round(v / 31.25f) + "x";
+                }
             }
             return "";
         }
 
-        public static string formatPoisonDam(int v) {
-            return v.ToString();
-        }
-
         public static string formatFireDam(int v) {
-            return v.ToString();
+            return formatPoisonDam(v);
         }
 
         static double round(float a) {
