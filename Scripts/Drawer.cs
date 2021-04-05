@@ -17,7 +17,6 @@ namespace SekiroNumbersMod {
 
 
         int hp, post, maxHp, maxPost;
-        int baseDamage;
         int lastHp = -1;
         int lastPost = -1;
         Entity lockedEntity;
@@ -53,6 +52,7 @@ namespace SekiroNumbersMod {
         Stopwatch lastHitPost = new Stopwatch();
 
         Stopwatch diagn = new Stopwatch();
+        Stopwatch statUpdate = new Stopwatch();
         int time, count;
 
         public Drawer() {
@@ -79,23 +79,17 @@ namespace SekiroNumbersMod {
             diagn.Start();
             lastHitHp.Start();
             lastHitPost.Start();
+            statUpdate.Start();
         }
 
         public void updateData() {
+            //diagn.Restart();
             updatePlayerData();
             updateEnemyData();
+            //Console.WriteLine(diagn.ElapsedMilliseconds);
         }
 
         public void draw(Graphics g) {
-            V3 camCors = DataReader.cameraCoords();
-            if (diagn.ElapsedMilliseconds > 1000) {
-                diagn.Restart();
-            }
-            /*foreach(Entity e in entities) {
-                string exit;
-                Point pos = toScreenCors2(e.cors, out exit);
-                g.DrawString(exit , font, Brushes.White, pos);
-            }*/
             drawStatic(g);
             drawFloating(g);
             
@@ -198,21 +192,21 @@ namespace SekiroNumbersMod {
                     //TODO: dont spawn right in the center of the screen, it causes micro stagger!
                     PointF screenCors = toScreenCors(entity.cors);
                     if (dHp < 0) {
-                        addNumber(new PointF(screenCors.X - 0.02f, screenCors.Y - 0.1f), hpDamC, -dHp);
-                        Console.WriteLine(entity.address);
+                        addNumber(new PointF(screenCors.X - 0.02f, screenCors.Y - 0.1f), hpDamC, -dHp, entity);
+                        //Console.WriteLine(entity.address);
                     } else if (dHp > 0 && dHp != entity.d.maxHp) {
-                        addNumber(new PointF(screenCors.X - 0.02f, screenCors.Y - 0.1f), hpHealC, dHp);
+                        addNumber(new PointF(screenCors.X - 0.02f, screenCors.Y - 0.1f), hpHealC, dHp, entity);
                     }
                     if (dPost < 0) {
-                        addNumber(new PointF(screenCors.X + 0.02f, screenCors.Y - 0.1f), postDamC, -dPost);
+                        addNumber(new PointF(screenCors.X + 0.02f, screenCors.Y - 0.1f), postDamC, -dPost, entity);
                     } else if (dPost > 30 && dPost > entity.d.maxPost / 8 && dPost != entity.d.maxPost) {
-                        addNumber(new PointF(screenCors.X + 0.02f, screenCors.Y - 0.1f), postHealC, dPost);
+                        addNumber(new PointF(screenCors.X + 0.02f, screenCors.Y - 0.1f), postHealC, dPost, entity);
                     }
                     if (dPsn < 0) {
-                        addNumber(new PointF(screenCors.X, screenCors.Y + 0.01f), poisonDamC, -dPsn);
+                        addNumber(new PointF(screenCors.X, screenCors.Y + 0.01f), poisonDamC, -dPsn, entity);
                     }
                     if (dFire < 0) {
-                        addNumber(new PointF(screenCors.X, screenCors.Y + 0.01f), fireDamC, -dFire);
+                        addNumber(new PointF(screenCors.X, screenCors.Y + 0.01f), fireDamC, -dFire, entity);
                     }
                 }
             }
@@ -238,23 +232,25 @@ namespace SekiroNumbersMod {
                 lastEntities.Add(e);
         }
 
-        void addNumber(PointF pos, Color color, int value, bool combo = false) {
+        void addNumber(PointF pos, Color color, int value, Entity entity, bool combo = false) {
             FloatingNumber n;
             if (color == hpHealC || color == hpDamC) {
-                n = new FloatingNumber(pos, color, Config.formatHpDam(value)) { value = value };
+                n = new FloatingNumber(pos, color, Config.formatHpDam(value)) { value = value, entity = entity };
             } else if (color == postHealC || color == postDamC) {
-                n = new FloatingNumber(pos, color, Config.formatPostDam(value)) { value = value };
+                n = new FloatingNumber(pos, color, Config.formatPostDam(value)) { value = value, entity = entity };
             } else if (color == poisonDamC) {
-                n = new FloatingNumber(pos, color, Config.formatPoisonDam(value)) { value = value };
+                n = new FloatingNumber(pos, color, Config.formatPoisonDam(value)) { value = value, entity = entity };
             } else {
-                n = new FloatingNumber(pos, color, Config.formatFireDam(value)) { value = value };
+                n = new FloatingNumber(pos, color, Config.formatFireDam(value)) { value = value, entity = entity };
             }
-            if (combo)
+            if (combo)  //TODO wtf it should be separate for each number
                 n.big = 5;
             foreach (var e in numbers.ToArray()) {
-                if (e.color == n.color && e.counter <= 17 && e.entity == n.entity) {  //merge two close numbers
+                if (e.color == n.color && e.counter <= Config.comboTime && e.entity == n.entity) {  //merge two close numbers
+                    Console.WriteLine(numbers.Count);
                     numbers.Remove(e);
-                    addNumber(pos, color, value + e.value, true);
+                    Console.WriteLine(numbers.Count);
+                    addNumber(pos, color, value + e.value, entity, false);
                     return;
                 }
                     

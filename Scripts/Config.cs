@@ -16,6 +16,8 @@ namespace SekiroNumbersMod.Scripts {
         public static NumbersMode lockedVals = NumbersMode.RELATIVE;
         public static NumbersMode statusVals = NumbersMode.ABSOLUTE;
         public static bool status = true;
+        public static int comboTime = 17;  //default 17
+        public static int numberLifetime = 30; //default 30
         static Dictionary<string, string> fileToCodeNames = new Dictionary<string, string> 
         { { "Self Stats", "selfVals" }, { "Locked Stats", "lockedVals" }, { "Damage Numbers", "damageVals" }, {"Resistances", "status" } };
 

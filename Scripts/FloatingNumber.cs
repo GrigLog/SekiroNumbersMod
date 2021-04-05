@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace SekiroNumbersMod.Scripts {
     class FloatingNumber : Number {
         public int counter;
-        public int lifetime = 30;
         public int value;
         public int big;
+        public bool combo;
         public Entity entity;
 
 
@@ -30,9 +30,16 @@ namespace SekiroNumbersMod.Scripts {
                 else
                     g.DrawString(text, Drawer.smallFont, new SolidBrush(Color.FromArgb(getOpacity(), color)), getPos());
             }
-            if (counter++ == lifetime) {
+            if (counter++ == Config.numberLifetime) {
                 Drawer.numbers.Remove(this);
             }
+        }
+
+        public override bool Equals(object obj) {
+            FloatingNumber n = (FloatingNumber) obj;
+            if (n == null) return false;
+            return entity == n.entity;
+
         }
 
         protected override PointF getPos() {
@@ -43,7 +50,7 @@ namespace SekiroNumbersMod.Scripts {
             if (counter <= 20)
                 return 255;
             else
-                return 200 - (counter - 20) * 20;
+                return Math.Max(0, 200 - (counter - 20) * 20);
         }
     }
 }

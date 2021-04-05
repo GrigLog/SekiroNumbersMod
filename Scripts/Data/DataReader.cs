@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SekiroNumbersMod.Scripts;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -96,7 +97,7 @@ namespace SekiroNumbersMod {
                             corsPtr = findDataAddr(entityDecorPtr, map["entity x"]);
                             psPtr = findDataAddr(entityDecorPtr, map["entity poison"]);
 
-                            byte[] hpData = new byte[0x20];
+                            byte[] hpData = new byte[0x170];
                             ReadProcessMemory(processPtr, hpPtr, hpData, hpData.Length, 0);
                             int hp = BitConverter.ToInt32(hpData, 0);
                             int mHp = BitConverter.ToInt32(hpData, 4);
@@ -111,15 +112,19 @@ namespace SekiroNumbersMod {
                             float z = BitConverter.ToSingle(corsData, 0x20);
                             V3 cors = new V3(x, y, z);
 
-                            //TODO: resistances can be picked from Data, check performance
-                            byte[] resData = new byte[0x30];
-                            ReadProcessMemory(processPtr, psPtr, resData, resData.Length, 0);
-                            int poison = BitConverter.ToInt32(resData, 0);
-                            int fire = BitConverter.ToInt32(resData, 8);
-                            int mPoison = BitConverter.ToInt32(resData, 0x14);
-                            int mFire = BitConverter.ToInt32(resData, 0x1c);
-                            Entity.Resist resist = new Entity.Resist(poison, mPoison, fire, mFire);
-
+                            Entity.Resist resist;
+                            if (Config.status) {
+                                byte[] resData = new byte[0x30];
+                                ReadProcessMemory(processPtr, psPtr, resData, resData.Length, 0);
+                                int poison = BitConverter.ToInt32(resData, 0);
+                                int fire = BitConverter.ToInt32(resData, 8);
+                                int mPoison = BitConverter.ToInt32(resData, 0x14);
+                                int mFire = BitConverter.ToInt32(resData, 0x1c);
+                                resist = new Entity.Resist(poison, mPoison, fire, mFire);
+                            } else {
+                                resist = new Entity.Resist(0, 0, 0, 0);
+                            }
+                           
 
                             Entity e = new Entity(data, resist, cors, entityStart);
                             res.Add(e);
@@ -201,7 +206,8 @@ namespace SekiroNumbersMod {
         }
 
         public static int basePostDamage() {
-            int ap = getInt(modulePtr + playerOffset, "attack power");
+            return (int)(baseHpDamage() * 0.375);
+            /*int ap = getInt(modulePtr + playerOffset, "attack power");
             if (ap <= 14)
                 return (int)(30 + (ap - 1) * 7.5);
             else if (ap <= 27)
@@ -209,7 +215,7 @@ namespace SekiroNumbersMod {
             else if (ap <= 51)
                 return (int)(166 + (ap - 27) * 1.5);
             else
-                return (int)(202 + (ap - 51) * 0.25);
+                return (int)(202 + (ap - 51) * 0.25);*/
         }
 
 
