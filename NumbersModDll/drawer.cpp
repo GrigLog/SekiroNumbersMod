@@ -134,26 +134,26 @@ draw(HWND window, Player &player, Player &old_player, std::vector<Entity> &entit
             if ((d = b.hp - a.hp) != 0)
                 numbers.push_front(FloatingNumber(
                     d < 0 ? Colors::hp : Colors::hpHeal,
-                    {screenCors.x - 0.01f, screenCors.y},
+                    {screenCors.x - 0.02f, screenCors.y},
                     abs(d), b.hpMax, player.dmgHp,
                     d < 0 ? Config::enemyHpDmg : Config::enemyHpHeal));
             if ((d = b.post - a.post) != 0 && d < 0 || d > b.postMax * 0.05f)
                 numbers.push_front(FloatingNumber(
                     d < 0 ? Colors::postDmg : Colors::postHeal,
-                    {screenCors.x + 0.01f, screenCors.y},
+                    {screenCors.x + 0.02f, screenCors.y},
                     abs(d), b.postMax, player.dmgPost,
                     d < 0 ? Config::enemyPostDmg : Config::enemyPostHeal));
             if ((d = b.fireHp - a.fireHp) < 0)
                 numbers.push_front(FloatingNumber(
                     Colors::fire,
-                    {screenCors.x - 0.01f, screenCors.y + 0.01f},
-                    d, b.fireHpMax, 31,
+                    {screenCors.x - 0.02f, screenCors.y + 0.01f},
+                    -d, b.fireHpMax, 31,
                     Config::enemyFireDmg));
             if ((d = b.poisonHp - a.poisonHp) < 0)
                 numbers.push_front(FloatingNumber(
                     Colors::poison,
-                    {screenCors.x + 0.01f, screenCors.y + 0.01f},
-                    d, b.poisonHpMax, 31,
+                    {screenCors.x + 0.02f, screenCors.y + 0.01f},
+                    -d, b.poisonHpMax, 31,
                     Config::enemyPoisonDmg));
         }
         if (diff >= 0)
@@ -203,9 +203,9 @@ draw(HWND window, Player &player, Player &old_player, std::vector<Entity> &entit
                 d < 0 ? Config::playerPostDmg : Config::playerPostHeal));
         noPostDmgCtr = 300;
     }
-    if (noHpDmgCtr-- > 0)
+    if (noHpDmgCtr-- > 0 || player.hp != player.hpMax)
         centered_text(0.25f, 0.92f, format(player.hp, player.hpMax, player.dmgHp, Config::playerHp), Colors::hp, screenSize);
-    if (noPostDmgCtr-- > 0)
+    if (noPostDmgCtr-- > 0 || player.post != player.postMax)
         centered_text(0.5f, 0.92f, format(player.post, player.postMax, player.dmgPost, Config::playerPost), Colors::post, screenSize);
 
 
