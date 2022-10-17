@@ -30,7 +30,7 @@ std::string short_string_format(const char* format, ...) {
     return std::string(buf, chars);
 }
 
-std::string format(int stat, int max, int swordDmg, ValueFormat vf) {
+std::string format(int stat, int max, float swordDmg, ValueFormat vf) {
     switch (vf) {
         case SIMPLE:
             return std::to_string(stat);
@@ -147,13 +147,13 @@ draw(HWND window, Player &player, Player &old_player, std::vector<Entity> &entit
                 numbers.push_front(FloatingNumber(
                     Colors::fire,
                     {screenCors.x - 0.02f, screenCors.y + 0.01f},
-                    -d, b.fireHpMax, 31,
+                    -d, b.fireHpMax, 31.25,
                     Config::enemyFireDmg));
             if ((d = b.poisonHp - a.poisonHp) < 0)
                 numbers.push_front(FloatingNumber(
                     Colors::poison,
                     {screenCors.x + 0.02f, screenCors.y + 0.01f},
-                    -d, b.poisonHpMax, 31,
+                    -d, b.poisonHpMax, 31.25,
                     Config::enemyPoisonDmg));
         }
         if (diff >= 0)
@@ -179,10 +179,10 @@ draw(HWND window, Player &player, Player &old_player, std::vector<Entity> &entit
                       format(closest.post, closest.postMax, player.dmgPost, Config::enemyPost),
                       Colors::post, screenSize);
         centered_text(0.75f, 0.05f,
-                      format(closest.fireHp, closest.fireHpMax, 31, Config::enemyFire),
+                      format(closest.fireHp, closest.fireHpMax, 31.25, Config::enemyFire),
                       Colors::fire, screenSize);
         centered_text(0.75f, 0.08f,
-                      format(closest.poisonHp, closest.poisonHpMax, 31, Config::enemyPoison),
+                      format(closest.poisonHp, closest.poisonHpMax, 31.25, Config::enemyPoison),
                       Colors::poison, screenSize);
     }
 

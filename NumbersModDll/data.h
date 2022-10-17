@@ -93,7 +93,7 @@ struct Entity {
 struct Player {
     int hp, hpMax;
     int post, postMax;
-    int dmgHp, dmgPost;
+    float dmgHp, dmgPost;
     V3 cors, camera, lock;
 
     friend std::ostream &operator<<(std::ostream &os, const Player &player) {

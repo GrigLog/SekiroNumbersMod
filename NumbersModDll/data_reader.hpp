@@ -38,7 +38,7 @@ size_t deref_chain(const size_t* ptrs, int size) {
 //I believe macros suck but don't know any other way
 #define deref_chain(ptrs) deref_chain(ptrs, sizeof(ptrs) / sizeof(*(ptrs)))
 
-int get_hp_dmg(int ap) {
+float get_hp_dmg(int ap) {
     if (ap <= 14)
         return (ap + 3) * 20;
     else if (ap <= 27)
@@ -46,7 +46,7 @@ int get_hp_dmg(int ap) {
     else if (ap <= 51)
         return 443 + (ap - 27) * 4;
     else
-        return (int)(540 + (ap - 51) * 0.8);
+        return 540 + (ap - 51) * 0.8;
 }
 
 Player get_player() {
@@ -62,7 +62,7 @@ Player get_player() {
     p.post = deref<int>(playerStats + PLAYER.DATA.POSTURE);
     p.postMax = deref<int>(playerStats + PLAYER.DATA.POSTURE_MAX);
     p.dmgHp = get_hp_dmg(deref<int>(playerStats + PLAYER.DATA.ATK_POWER));
-    p.dmgPost = (int)(p.dmgHp * 0.375);
+    p.dmgPost = p.dmgHp * 0.375;
 
     size_t vec = deref_chain(CORDS.OFF);
     if (vec != 0)

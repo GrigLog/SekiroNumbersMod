@@ -14,10 +14,11 @@ public:
     ImVec4 color;
     int timer;
     ImVec2 pos;
-    int value, valueMax, playerDmg;
+    int value, valueMax;
+    float playerDmg;
     ValueFormat configOption;
 
-    FloatingNumber(ImVec4 color, ImVec2 pos, int value, int valueMax, int playerDmg, ValueFormat configOption) {
+    FloatingNumber(ImVec4 color, ImVec2 pos, int value, int valueMax, float playerDmg, ValueFormat configOption) {
         timer = 0;
         this->color = color;
         this->pos = pos;
