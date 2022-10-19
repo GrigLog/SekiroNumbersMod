@@ -7,6 +7,7 @@ namespace Config {
     const char *FORMATS[] = {"simple", "simple\\simple", "coeff", "coeff\\coeff", "per cent", "per cent precise", "none"};
     const int FORMATS_LEN = sizeof(FORMATS) / sizeof(*FORMATS);
     bool isOpen = false;
+    int cooldown = 0;
 
     ValueFormat OPTIONS(COMMA);
 
@@ -26,15 +27,24 @@ namespace Config {
         fclose(file);
     }
 
-    #define O_BRACE (
-    #define C_BRACE )
+    void saveAndClose() {
+        FILE* file = fopen(PATH, "w");
+        fprintf(file, TEMPLATE, OPTIONS(COMMA));
+        fclose(file);
+        isOpen = false;
+    }
+
     #define COMBO(x) ImGui::Combo(MACRO_STR(x), (int*)&x, FORMATS, FORMATS_LEN)
-    //#define OPTIONS_PREFIX(S) S##OPTIONS(S)
     void update() {
         if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Escape))
-                && ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Enter))) {
-            isOpen = true;
+                && ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Enter)) && cooldown <= 0) {
+            cooldown = 10;
+            if (!isOpen)
+                isOpen = true;
+            else
+                saveAndClose();
         }
+        cooldown--;
         if (isOpen) {
             ImGui::Begin("Config");
             COMBO(playerHp);
@@ -54,13 +64,10 @@ namespace Config {
             COMBO(enemyPoisonDmg);
             COMBO(enemyFireDmg);
 
-            if (ImGui::Button("Save")) {
-                FILE* file = fopen(PATH, "w");
-                fprintf(file, TEMPLATE, OPTIONS(COMMA));
-                fclose(file);
-                isOpen = false;
-            }
+            if (ImGui::Button("Save"))
+                saveAndClose();
             ImGui::End();
         }
     }
+
 }
